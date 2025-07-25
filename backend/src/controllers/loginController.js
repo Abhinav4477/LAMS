@@ -34,7 +34,7 @@ export const  login=async(req,res)=>{
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict' // Helps prevent CSRF attacks
         });
 
-        return res.status(200).json({ message: "Login successful" });
+        return res.status(200).json({ message: "Login successful", role: user.role,  });
 
 }
 catch (error) {

@@ -17,11 +17,16 @@ const PORT=process.env.PORT || 5001;
 //connecting to the database
 connectDB();
 
+app.use(cors({
+    credentials:true,
+    origin:"http://localhost:5173" // Allow requests from the frontend
+    }))
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cookieParser()); // Middleware to parse cookies
-app.use(cors({credentials:true}))
+
 
 //redirecting the requests to the corresponding Routes
+
 app.use("/api/auth",loginRoutes);
 
 

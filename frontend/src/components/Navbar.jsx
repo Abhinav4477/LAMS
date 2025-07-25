@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 const Navbar = () => {
   return (
     <div data-theme="corporate">
-<div className="navbar bg-base-100 shadow-sm relative z-[1] mb-8">
+<div className="navbar bg-base-100 shadow-sm relative z-[1] ">
         <div className="navbar-start">
           <div className="dropdown relative">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -16,30 +16,30 @@ const Navbar = () => {
               tabIndex={0}
               className="menu menu-sm dropdown-content absolute bg-base-100 rounded-box z-[9999] mt-3 w-52 p-2 shadow"
             >
-              <li><a>Home</a></li>
+            <li><Link to="/">Home</Link></li>
               <li>
-                <a>Parent</a>
+                <a>Account</a>
                 <ul className="p-2">
-                  <li><a>New Account</a></li>
-                  <li><a>Log-In</a></li>
+                  <li><Link to="/register">New Account</Link></li>
+                  <li><Link to="/login">Log-In</Link></li>
                 </ul>
               </li>
               <li><a>About</a></li>
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl">
-            <img src="/src/assets/lams.png" alt="Logo" className="h-12" />
-          </a>
+          <Link to="/" >
+           <img src="/src/assets/lams.png" alt="Logo" className="h-12" />
+          </Link>
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
-            <li><a>Home</a></li>
+            <li><Link to="/">Home</Link></li>
             <li>
               <details>
                 <summary>Account</summary>
                 <ul className="p-2">
-                  <li><a>New Account</a></li>
-                  <li><a href=''>Log-In</a></li>
+                  <li><Link to="/register">New Account</Link></li>
+                  <li><Link to="/login">Log-In</Link></li>
                 </ul>
               </details>
             </li>
@@ -47,7 +47,10 @@ const Navbar = () => {
           </ul>
         </div>
         <div className="navbar-end">
-          <a className="btn btn-neutral btn-outline">Sign In</a>
+          <Link to="/login" >
+          Sign In
+
+            </Link>
         </div>
       </div>
     </div>
