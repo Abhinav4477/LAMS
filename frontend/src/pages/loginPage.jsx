@@ -4,12 +4,19 @@ import toast from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import axios from 'axios'
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
+import { cn } from "../lib/utils";
+import { ShootingStars } from "../components/ui/shooting-stars";
+import { StarsBackground } from "../components/ui/stars-background";
 
-const LoginPage = () => {
-  const [username, setUsername] = useState('')
+
+
+const LoginPage=()=> {
+ const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate();
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       toast.error('Please fill in all fields');
@@ -39,44 +46,70 @@ const LoginPage = () => {
       toast.error(error?.response?.data?.error || 'Error logging in');
 
     }
-  }
-
-    // Add login logic here, e.g., API call to authenticate user
-    // If successful, navigate to the dashboard or home page
-  
-
+  };
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
-       <div className="hero bg-base-200 min-h-screen" style={{ backgroundImage: "url(/c.jpg)" }}>
-  <div className="hero-content flex-col lg:flex-row-reverse">
-    <div className="text-center lg:text-left">
-      <h1 className="text-5xl font-bold">Login now!</h1>
-      <p className="py-6">
-        Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem
-        quasi. In deleniti eaque aut repudiandae et a id nisi.
-      </p>
-    </div>
-    <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-      <div className="card-body">
-        <form onSubmit={handleLogin}>
-        <fieldset className="fieldset">
-          <label className="label">Username</label>
-          <input type="text" className="input" placeholder="Username" onChange={(e)=> setUsername(e.target.value)} value={username} />
-          <label className="label">Password</label>
-          <input type="password" className="input" placeholder="Password" onChange={(e)=> setPassword(e.target.value)} value={password} />
-          <div><a className="link link-hover">Forgot password?</a></div>
-          <button className="btn btn-neutral mt-4" type="submit">Login</button>
-        </fieldset>
-        </form>
-      </div>
+    <div>
+    <Navbar />
+    <div className="h-[40rem] rounded-md bg-neutral-900 flex flex-col items-center justify-center relative w-full">
+    <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black z-20">
+      <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        Login here
+      </h2>
+      
+ 
+      <form className="my-8" onSubmit={handleSubmit}>
+       
+       
+        <LabelInputContainer className="mb-8">
+          <Label htmlFor="twitterpassword">Username</Label>
+          <Input
+            id="uname"
+            placeholder="username"
+            type="text"
+             onChange={(e)=> setUsername(e.target.value)} value={username}
+          />
+        </LabelInputContainer>
+        <LabelInputContainer className="mb-4">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" placeholder="password" type="password" onChange={(e) => setPassword(e.target.value)} value={password} />
+        </LabelInputContainer>
         
-    </div>
-  </div>
-</div>
-      <Footer />
-    </div>
-  )
-}
+ 
+        <button
+          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+          type="submit"
+        >
+          Sign In &rarr;
+          <BottomGradient />
+        </button>
+ 
+        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
+      </form>
+       
+    </div>
+    <ShootingStars />
+      <StarsBackground />
+      </div>
+    <Footer />
+    </div>
+  );
+}
+ 
+const BottomGradient = () => {
+  return (
+    <>
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
+    </>
+  );
+};
+ 
+const LabelInputContainer = ({ children, className }) => {
+  return (
+    <div className={cn("flex w-full flex-col space-y-2", className)}>
+      {children}
+    </div>
+  );
+};
 export default LoginPage
