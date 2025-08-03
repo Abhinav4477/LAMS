@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 const Navbar = () => {
   return (
     <div data-theme="corporate">
-<div className="navbar bg-base-100 shadow-sm relative z-[1] ">
+<div className="navbar bg-base-100 shadow-sm relative z-100 ">
         <div className="navbar-start">
           <div className="dropdown relative">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
