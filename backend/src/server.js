@@ -1,5 +1,6 @@
 import express from "express"
 import loginRoutes from "./routes/authenticationRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -28,6 +29,7 @@ app.use(cookieParser()); // Middleware to parse cookies
 //redirecting the requests to the corresponding Routes
 
 app.use("/api/auth",loginRoutes);
+app.use("/api/admin",adminRoutes);
 
 
 app.listen(5001,()=>{
