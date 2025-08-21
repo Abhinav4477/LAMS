@@ -7,6 +7,7 @@ import UserHomepage from './pages/user/userHomepage.jsx'
 import AdminHomepage from './pages/admin/adminHomepage.jsx'
 import AddState from './pages/admin/addstate.jsx'
 import ViewState from './pages/admin/viewstate.jsx'
+import UpdateState from './pages/admin/updatestate.jsx'
 import { Toaster } from 'react-hot-toast'
 
 const App = () => {
@@ -21,6 +22,8 @@ const App = () => {
       <Route path="/admin/adminHomepage" element={<AdminHomepage />} />
       <Route path="/admin/addstate" element={<AddState />} />
       <Route path="/admin/viewstate" element={<ViewState />} />
+     <Route path="/admin/updatestate/:id" element={<UpdateState />} />
+
 
 </Routes>
     </div>

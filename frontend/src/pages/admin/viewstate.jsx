@@ -62,7 +62,7 @@ const ViewState = () => {
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    onClick={() => navigate(`/admin/updatestate/${state._id}`)}
+                    onClick={() => navigate(`/admin/updatestate/${state._id}`)} 
                     className="btn btn-sm btn-warning"
                   >
                     Update

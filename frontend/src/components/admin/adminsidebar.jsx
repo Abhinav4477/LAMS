@@ -4,28 +4,49 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
-  IconUserBolt,
+  IconLocationPin,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const SidebarLayout = ({ children }) => {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:5001/api/auth/logout", {}, { withCredentials: true });
+      toast.success("Logout successful");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error logging out");
+    }
+  };
 
   const links = [
     {
       label: "Dashboard",
-      href: "/admin/dashboard",
+      href: "/admin/adminhomepage",
       icon: (
         <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
-      label: "State",
+      label: "Add State",
       href: "/admin/addstate",
       icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconLocationPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+    },
+    {
+      label: "View State",
+      href: "/admin/viewstate",
+      icon: (
+        <IconLocationPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
@@ -37,14 +58,13 @@ const SidebarLayout = ({ children }) => {
     },
     {
       label: "Logout",
-      href: "/logout",
+      href: "#", // dummy, we’ll handle manually
       icon: (
         <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
+      isLogout: true, // ✅ mark this link
     },
   ];
-
-  const [open, setOpen] = useState(false);
 
   return (
     <div
@@ -63,7 +83,9 @@ const SidebarLayout = ({ children }) => {
                 <SidebarLink
                   key={idx}
                   link={link}
-                  onClick={() => navigate(link.href)} // ✅ navigate on click
+                  onClick={() =>
+                    link.isLogout ? handleLogout() : navigate(link.href)
+                  }
                 />
               ))}
             </div>
