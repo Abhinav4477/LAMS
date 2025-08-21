@@ -6,6 +6,7 @@ import CreateAccount from './pages/createAccount.jsx'
 import UserHomepage from './pages/user/userHomepage.jsx'
 import AdminHomepage from './pages/admin/adminHomepage.jsx'
 import AddState from './pages/admin/addstate.jsx'
+import ViewState from './pages/admin/viewstate.jsx'
 import { Toaster } from 'react-hot-toast'
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
       <Route path="/user/userHomepage" element={<UserHomepage />} />
       <Route path="/admin/adminHomepage" element={<AdminHomepage />} />
       <Route path="/admin/addstate" element={<AddState />} />
+      <Route path="/admin/viewstate" element={<ViewState />} />
 
 </Routes>
     </div>

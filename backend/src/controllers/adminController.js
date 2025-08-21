@@ -23,3 +23,12 @@ export const addState = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getStates = async (req, res) => {
+    try {
+        const states = await State.find().sort({ name: 1 });
+        return res.status(200).json(states);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
