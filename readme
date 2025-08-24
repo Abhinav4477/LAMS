@@ -1,1 +1,20 @@
-//project documents
+# Local Aid Management System (LAMS)
+
+Local Aid Management System (LAMS) is a web-based platform connecting users with verified local service providers for jobs like plumbing, babysitting, and electrical work.
+
+---
+
+## 📖 Documentation
+
+For detailed setup instructions, guides, and tutorials, visit our [Wiki](https://github.com/Abhinav4477/LAMS/wiki).
+
+---
+
+## Features
+
+- Authentication & Authorization
+- Service Management
+- Job Handling and Tracking
+- Service Provider Availability & Scheduling
+- Payment and Transaction Management
+- Data Configuration and Administration
