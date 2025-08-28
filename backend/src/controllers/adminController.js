@@ -1,6 +1,7 @@
 import State from "../models/States.js";
 import District from "../models/Districts.js";
 import Location from "../models/Location.js";
+import Category from "../models/Category.js";
 
 //Function to add a new state
 export const addState = async (req, res) => {
@@ -356,3 +357,106 @@ export const getLocationsByDistrict = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch locations" });
   }
 };
+
+//Function to add a new category
+export const addCategory = async (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "Category name is required" });
+  }
+
+  try {
+    // Check if category already exists
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
+      return res.status(400).json({ error: "Category already exists" });
+    }
+
+    const newCategory = new Category({ name });
+    await newCategory.save();
+
+    return res
+      .status(201)
+      .json({ message: "Category added successfully", category: newCategory });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+//Function to get all categories
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Category.find().sort({ name: 1 });
+    return res.status(200).json(categories);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+//Function to delete a category
+export const deleteCategory = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Category ID is required" });
+  }
+
+  try {
+    const category = await Category.findByIdAndDelete(id);
+
+    if (!category) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    return res.status(200).json({ message: "Category deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+//Function to update a category
+export const updateCategory = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  if (!id || !name) {
+    return res.status(400).json({ error: "Category ID and name are required" });
+  }
+
+  try {
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      { name },
+      { new: true }
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Category updated successfully", category: updatedCategory });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+//Function to get a specific category by id
+export const getCategoryById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Category ID is required" });
+  }
+
+  try {
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+    return res.status(200).json(category);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

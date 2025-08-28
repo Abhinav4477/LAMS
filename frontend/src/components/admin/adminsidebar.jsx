@@ -3,10 +3,13 @@ import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import {
   IconArrowLeft,
   IconBrandTabler,
-  IconSettings,
+  IconUserSquareRounded,
   IconLocationPin,
   IconChevronRight,
   IconChevronDown,
+  IconCategory2,
+  IconMapPinFilled,
+  IconWorldPin,
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
@@ -52,7 +55,7 @@ const SidebarLayout = ({ children }) => {
     {
       label: "State",
       icon: (
-        <IconLocationPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconWorldPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
       subItems: [
         { label: "Add State", href: "/admin/addstate" },
@@ -72,7 +75,7 @@ const SidebarLayout = ({ children }) => {
      {
       label: "Location",
       icon: (
-        <IconLocationPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconMapPinFilled className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
       subItems: [
         { label: "Add Location", href: "/admin/addlocation" },
@@ -80,11 +83,14 @@ const SidebarLayout = ({ children }) => {
       ],
     },
     {
-      label: "Settings",
-      href: "/admin/settings",
+      label: "Category",
       icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconCategory2 className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
+      subItems: [
+        { label: "Add Category", href: "/admin/addcategory" },
+        { label: "View Category", href: "/admin/viewcategory" },
+      ],
     },
     {
       label: "Logout",
@@ -166,16 +172,11 @@ const SidebarLayout = ({ children }) => {
           <div>
             <SidebarLink
               link={{
-                label: "Abhinav",
+                label: "Admin",
                 href: "#",
                 icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
+        <IconUserSquareRounded className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+                  
                 ),
               }}
             />

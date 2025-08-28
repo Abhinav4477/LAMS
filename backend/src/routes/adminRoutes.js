@@ -16,6 +16,11 @@ import { deleteLocation } from "../controllers/adminController.js";
 import { updateLocation } from "../controllers/adminController.js";
 import { getLocationById } from "../controllers/adminController.js";
 import { getLocationsByDistrict } from "../controllers/adminController.js";
+import { addCategory } from "../controllers/adminController.js";
+import { getCategories } from "../controllers/adminController.js";
+import { deleteCategory } from "../controllers/adminController.js";
+import { updateCategory } from "../controllers/adminController.js";
+import { getCategoryById } from "../controllers/adminController.js";
 
 const router = express.Router();
 // Route to add a new state
@@ -52,6 +57,14 @@ router.put("/updatelocation/:id", updateLocation);
 router.get("/getlocation/:id", getLocationById);
 //Route to get locations by state and district
 router.get("/getlocationbydistrict/:districtId", getLocationsByDistrict);
-
-
+//Route to add a category
+router.post("/addcategory", addCategory);
+//Route to get all categories
+router.get("/getcategories", getCategories);
+//Route to delete a category by ID
+router.delete("/deletecategory/:id", deleteCategory);
+//Route to update a category
+router.put("/updatecategory/:id", updateCategory);
+//Route to get a specific category
+router.get("/getcategory/:id", getCategoryById);
 export default router;
