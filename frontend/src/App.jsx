@@ -11,6 +11,9 @@ import UpdateState from './pages/admin/updatestate.jsx'
 import Adddistrict from './pages/admin/adddistrict.jsx'
 import Viewdistrict from './pages/admin/viewdistrict.jsx'
 import UpdateDistrict from './pages/admin/updatedistrict.jsx'
+import Addlocation from './pages/admin/addlocation.jsx'
+import Viewlocation from './pages/admin/viewlocation.jsx'
+import UpdateLocation from './pages/admin/updatelocation.jsx'
 import { Toaster } from 'react-hot-toast'
 
 const App = () => {
@@ -29,6 +32,9 @@ const App = () => {
      <Route path="/admin/adddistrict" element={<Adddistrict />} />
       <Route path="/admin/viewdistrict" element={<Viewdistrict />} />
       <Route path="/admin/updatedistrict/:id" element={<UpdateDistrict />} />
+      <Route path="/admin/addlocation" element={<Addlocation />} />
+      <Route path="/admin/viewlocation" element={<Viewlocation />} />
+      <Route path="/admin/updatelocation/:id" element={<UpdateLocation />} />
 
 
 </Routes>

@@ -10,6 +10,12 @@ import { getDistrictsByState } from "../controllers/adminController.js";
 import { deleteDistrict } from "../controllers/adminController.js";
 import { updateDistrict } from "../controllers/adminController.js";
 import { getDistrictById } from "../controllers/adminController.js";
+import {addLocation}  from "../controllers/adminController.js";
+import {getAllLocations} from "../controllers/adminController.js";
+import { deleteLocation } from "../controllers/adminController.js";
+import { updateLocation } from "../controllers/adminController.js";
+import { getLocationById } from "../controllers/adminController.js";
+import { getLocationsByDistrict } from "../controllers/adminController.js";
 
 const router = express.Router();
 // Route to add a new state
@@ -34,6 +40,18 @@ router.delete("/deletedistrict/:id", deleteDistrict);
 router.put("/updatedistrict/:id", updateDistrict);
 //Route to get a specific district
 router.get("/getdistrict/:id", getDistrictById);
+//Route to add a location
+router.post("/addlocation", addLocation);
+//Route to get all locations
+router.get("/getlocations", getAllLocations);
+//Route to delete a location by ID
+router.delete("/deletelocation/:id", deleteLocation);
+//Route to update a location
+router.put("/updatelocation/:id", updateLocation);
+//Route to get a specific location
+router.get("/getlocation/:id", getLocationById);
+//Route to get locations by state and district
+router.get("/getlocationbydistrict/:districtId", getLocationsByDistrict);
 
 
 export default router;

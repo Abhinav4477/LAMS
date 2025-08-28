@@ -69,6 +69,16 @@ const SidebarLayout = ({ children }) => {
         { label: "View District", href: "/admin/viewdistrict" },
       ],
     },
+     {
+      label: "Location",
+      icon: (
+        <IconLocationPin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      subItems: [
+        { label: "Add Location", href: "/admin/addlocation" },
+        { label: "View Location", href: "/admin/viewlocation" },
+      ],
+    },
     {
       label: "Settings",
       href: "/admin/settings",
@@ -190,7 +200,7 @@ export const Logo = () => (
   >
     {/* Logo Image */}
     <img
-      src="../../../public/logo.png" // Replace with your logo path or URL
+      src="/logo.png" // Replace with your logo path or URL
       alt="Logo"
       className="h-5 w-6 shrink-0"
     />
@@ -212,7 +222,7 @@ export const LogoIcon = () => (
   >
     {/* Logo Image for collapsed sidebar */}
     <img
-      src="../../../public/logo.png" // Replace with your logo path or URL
+      src="/logo.png" // Replace with your logo path or URL
       alt="Logo"
       className="h-5 w-6 shrink-0"
     />

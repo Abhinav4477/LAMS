@@ -1,5 +1,6 @@
 import State from "../models/States.js";
 import District from "../models/Districts.js";
+import Location from "../models/Location.js";
 
 //Function to add a new state
 export const addState = async (req, res) => {
@@ -219,3 +220,139 @@ export const getDistrictById = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+//Function to add a new location
+export const addLocation = async (req, res) => {
+    const { name, districtId } = req.body;
+
+    if (!name || !districtId) {
+        return res.status(400).json({ error: "Location name and district ID are required" });
+    }
+
+    try {
+        const existingLocation = await Location.findOne({ name, district: districtId });
+
+        if (existingLocation) {
+            return res.status(400).json({ error: "Location already exists in this district" });
+        }
+
+        const newLocation = new Location({ name, district: districtId });
+        await newLocation.save();
+
+        return res.status(201).json({ message: "Location added successfully", location: newLocation });
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+//Function to get all locations with their associated district and state names
+export const getAllLocations = async (req, res) => {
+  try {
+    // Populate district and state
+    const locations = await Location.find()
+      .populate({
+        path: "district",
+        select: "name state", // get district name and state reference
+        populate: { path: "state", select: "name" } // populate state name
+      })
+      .sort({ createdAt: -1 }); // optional: latest first
+
+    res.status(200).json(locations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch locations", error: error.message });
+  }
+};
+
+//Fuction to delete a location
+export const deleteLocation = async (req, res) => { 
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Location ID is required" });
+  }
+
+  try {
+    const location = await Location.findByIdAndDelete(id);
+
+    if (!location) {
+      return res.status(404).json({ error: "Location not found" });
+    }
+
+    return res.status(200).json({ message: "Location deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+//Fuction to update a location
+export const updateLocation = async (req, res) => {
+  const { id } = req.params;
+  const { name, districtId } = req.body;
+
+  if (!id || !name || !districtId) {
+    return res.status(400).json({ error: "Location ID, name, and district ID are required" });
+  }
+
+  try {
+    const updatedLocation = await Location.findByIdAndUpdate(
+      id,
+      { name, district: districtId },
+      { new: true }
+    );
+
+    if (!updatedLocation) {
+      return res.status(404).json({ error: "Location not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Location updated successfully", location: updatedLocation });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+//Function to get location by ID
+export const getLocationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find location and populate district and state details
+    const location = await Location.findById(id)
+      .populate({
+        path: "district",
+        populate: { path: "state" },
+      });
+
+    if (!location) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+
+    res.status(200).json(location);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// Get locations filtered by district (and optionally by state)
+export const getLocationsByDistrict = async (req, res) => {
+  try {
+    const { districtId } = req.params; // get districtId from URL param
+
+    if (!districtId) {
+      return res.status(400).json({ message: "District ID is required" });
+    }
+
+    // Fetch locations that belong to this district
+    const locations = await Location.find({ district: districtId }).populate({
+      path: "district",
+      populate: { path: "state" },
+    });
+
+    res.json(locations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch locations" });
+  }
+};
