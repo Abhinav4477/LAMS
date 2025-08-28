@@ -13,10 +13,7 @@ const app=express();
 //setting the port to connect
 const PORT=process.env.PORT || 5001;
 
-
-
-//connecting to the database
-connectDB();
+//middlewares
 
 app.use(cors({
     credentials:true,
@@ -31,8 +28,14 @@ app.use(cookieParser()); // Middleware to parse cookies
 app.use("/api/auth",loginRoutes);
 app.use("/api/admin",adminRoutes);
 
-
-app.listen(5001,()=>{
+//connecting to the database and then starting the server
+connectDB().then(()=>{
+    console.log("Connected to the Database");
+    app.listen(5001,()=>{
     console.log("Server Started at PORT "+PORT);
 })
+}).catch((err)=>{
+    console.log("Error connecting to the Database",err);
+})
+
 
