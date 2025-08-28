@@ -18,7 +18,8 @@ import UpdateLocation from './pages/admin/updatelocation.jsx'
 import Addcategory from './pages/admin/addcategory.jsx'
 import Viewcategory from './pages/admin/viewcategories.jsx'
 import UpdateCategory from './pages/admin/updatecategory.jsx'
-import serviceproviderHomepage from './pages/serviceprovider/serviceproviderHomepage.jsx'
+import ServiceproviderHomepage from './pages/serviceprovider/serviceproviderHomepage.jsx'
+import Viewsprequests from './pages/admin/viewsprequests.jsx'
 
 import { Toaster } from 'react-hot-toast'
 
@@ -45,7 +46,8 @@ const App = () => {
       <Route path="/admin/viewcategory" element={<Viewcategory />} />
       <Route path="/admin/updatecategory/:id" element={<UpdateCategory />} />
       <Route path="/register/provider" element={<CreateServiceProviderAccount />} />
-      <Route path="/serviceprovider/serviceproviderHomepage" element={<serviceproviderHomepage />} />
+      <Route path="/serviceprovider/serviceproviderHomepage" element={<ServiceproviderHomepage />} />
+      <Route path="/admin/viewsprequests" element={<Viewsprequests />} />
       
 
 

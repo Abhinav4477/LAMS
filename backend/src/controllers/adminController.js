@@ -2,6 +2,8 @@ import State from "../models/States.js";
 import District from "../models/Districts.js";
 import Location from "../models/Location.js";
 import Category from "../models/Category.js";
+import User from "../models/Users.js";
+import ServiceProvider from "../models/ServiceProvider.js";
 
 //Function to add a new state
 export const addState = async (req, res) => {
@@ -460,3 +462,65 @@ export const getCategoryById = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+
+// ✅ Get all unverified service provider requests
+export const getAllServiceProviders = async (req, res) => {
+  try {
+    const providers = await ServiceProvider.find()
+      .populate("user", "username email")
+      .populate("category", "name");
+
+    const requests = providers.map((p) => ({
+      providerId: p._id,
+      username: p.user?.username || "N/A",
+      email: p.user?.email || "N/A",
+      category: p.category?.name || "N/A",
+      is_verified: p.is_verified,
+    }));
+
+    return res.status(200).json({ requests });
+  } catch (error) {
+    console.error("Error fetching providers:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ✅ Verify a service provider
+// PUT /api/admin/verifyserviceprovider/:id
+export const verifyServiceProvider = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const provider = await ServiceProvider.findByIdAndUpdate(
+      id,
+      { is_verified: true },
+      { new: true } // important: return the updated object
+    );
+    if (!provider) return res.status(404).json({ error: "Provider not found" });
+
+    return res.status(200).json({ message: "Provider verified", provider });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+// ✅ Revoke verification
+// PUT /api/admin/revokeserviceprovider/:id
+export const revokeServiceProvider = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const provider = await ServiceProvider.findByIdAndUpdate(
+      id,
+      { is_verified: false },
+      { new: true } // important
+    );
+    if (!provider) return res.status(404).json({ error: "Provider not found" });
+
+    return res.status(200).json({ message: "Provider revoked", provider });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};

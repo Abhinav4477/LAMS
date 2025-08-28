@@ -21,6 +21,9 @@ import { getCategories } from "../controllers/adminController.js";
 import { deleteCategory } from "../controllers/adminController.js";
 import { updateCategory } from "../controllers/adminController.js";
 import { getCategoryById } from "../controllers/adminController.js";
+import { verifyServiceProvider} from "../controllers/adminController.js";
+import { getAllServiceProviders} from "../controllers/adminController.js";
+import { revokeServiceProvider } from "../controllers/adminController.js";
 
 const router = express.Router();
 // Route to add a new state
@@ -67,4 +70,10 @@ router.delete("/deletecategory/:id", deleteCategory);
 router.put("/updatecategory/:id", updateCategory);
 //Route to get a specific category
 router.get("/getcategory/:id", getCategoryById);
+//Route to verify a service provider
+router.put("/verifyserviceprovider/:id", verifyServiceProvider);
+//Route to get all service provider verification requests
+router.get("/getsprequests", getAllServiceProviders);
+//Route to revoke a service provider verification
+router.put("/revokeserviceprovider/:id", revokeServiceProvider);
 export default router;

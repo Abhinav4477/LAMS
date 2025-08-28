@@ -14,5 +14,7 @@ const serviceProviderSchema = new mongoose.Schema({
   is_available: { type: Boolean, default: true },
 }, { timestamps: true });
 
-const ServiceProvider = mongoose.model('ServiceProvider', serviceProviderSchema);
+// ✅ Prevent OverwriteModelError
+const ServiceProvider = mongoose.models.ServiceProvider || mongoose.model('ServiceProvider', serviceProviderSchema);
+
 export default ServiceProvider;

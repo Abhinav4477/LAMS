@@ -10,43 +10,36 @@ import transporter from '../confg/nodemailer.js';
 export const login = async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password are required" });
-  }
-
   try {
     const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    let is_verified = true; // default for normal users/admins
+
+    if (user.role === "provider") {
+      const provider = await ServiceProvider.findOne({ user: user._id });
+      if (!provider) return res.status(404).json({ error: "Provider not found" });
+      is_verified = provider.is_verified;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid username or password" });
-    }
+    // generate token if you use JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    // ✅ Check verification for service providers
-    if (user.role === "service-provider" && !user.isVerified) {
-      return res.status(403).json({ error: "Your account is not verified yet. Please wait for admin approval." });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    res.json({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      is_verified, // ✅ send this field
+      token,
     });
-
-    return res.status(200).json({ message: "Login successful", role: user.role });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };
-
-
 // -------------------- CREATE CUSTOMER ACCOUNT --------------------
 export const createAccount = async (req, res) => {
   const { username, email, password, role, name, phone, age, gender } = req.body;

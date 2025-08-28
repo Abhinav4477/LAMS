@@ -72,7 +72,7 @@ const SidebarLayout = ({ children }) => {
         { label: "View District", href: "/admin/viewdistrict" },
       ],
     },
-     {
+    {
       label: "Location",
       icon: (
         <IconMapPinFilled className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
@@ -90,6 +90,16 @@ const SidebarLayout = ({ children }) => {
       subItems: [
         { label: "Add Category", href: "/admin/addcategory" },
         { label: "View Category", href: "/admin/viewcategory" },
+      ],
+    },
+    {
+      label: "Service Providers",
+      icon: (
+        <IconUserSquareRounded className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+      ),
+      subItems: [
+        { label: "All Providers", href: "/admin/viewsprequests" },
+        
       ],
     },
     {
@@ -175,8 +185,7 @@ const SidebarLayout = ({ children }) => {
                 label: "Admin",
                 href: "#",
                 icon: (
-        <IconUserSquareRounded className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-                  
+                  <IconUserSquareRounded className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
                 ),
               }}
             />
@@ -199,13 +208,7 @@ export const Logo = () => (
     href="/admin/adminhomepage"
     className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
   >
-    {/* Logo Image */}
-    <img
-      src="/logo.png" // Replace with your logo path or URL
-      alt="Logo"
-      className="h-5 w-6 shrink-0"
-    />
-    {/* Animated Text */}
+    <img src="/logo.png" alt="Logo" className="h-5 w-6 shrink-0" />
     <motion.span
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -221,12 +224,7 @@ export const LogoIcon = () => (
     href="/admin/adminhomepage"
     className="relative z-20 flex items-center justify-center py-1 text-sm font-normal text-black"
   >
-    {/* Logo Image for collapsed sidebar */}
-    <img
-      src="/logo.png" // Replace with your logo path or URL
-      alt="Logo"
-      className="h-5 w-6 shrink-0"
-    />
+    <img src="/logo.png" alt="Logo" className="h-5 w-6 shrink-0" />
   </a>
 );
 
