@@ -10,98 +10,135 @@ import { cn } from "../lib/utils";
 import { ShootingStars } from "../components/ui/shooting-stars";
 import { StarsBackground } from "../components/ui/stars-background";
 
-
-
-const LoginPage=()=> {
- const [username, setUsername] = useState('')
+const LoginPage = () => {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [modalMessage, setModalMessage] = useState('')
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
       toast.error('Please fill in all fields');
       return;
     }
+
     try {
-      const res=await axios.post("http://localhost:5001/api/auth/login", {
+      const res = await axios.post("http://localhost:5001/api/auth/login", {
         username,
         password
       }, {
         withCredentials: true
       });
-      toast.success('Login successful');
-   console.log(res.data);
-         // Assuming the response contains user data and role
-         localStorage.setItem('user', JSON.stringify(res.data));
-         // Redirect based on user role
-        const role = res.data.role;
-         if (role === 'admin') {
-    navigate('/admin/adminHomepage');
-  } else if (role === 'user') {
-    navigate('/user/userHomepage'); // Or homepage
-  }
-  else if (role === 'provider') {
-    navigate('/serviceprovider/serviceproviderHomepage'); // Or homepage
-  }
-  else {
-    toast.error('Unknown user role');
-  }
-    } catch (error) { 
-      console.error(error);
-      toast.error('Error logging in');
-      toast.error(error?.response?.data?.error || 'Error logging in');
 
+      const { role, isVerified } = res.data;
+
+      // ✅ Frontend check for unverified providers
+      if (role === 'provider' && !isVerified) {
+        setModalMessage('Your account is not verified yet. Please wait for admin approval.');
+        setShowModal(true);
+        return; // Stop further redirection
+      }
+
+      toast.success('Login successful');
+      console.log(res.data);
+
+      // Store user info
+      localStorage.setItem('user', JSON.stringify(res.data));
+
+      // Redirect based on role
+      if (role === 'admin') {
+        navigate('/admin/adminHomepage');
+      } else if (role === 'user') {
+        navigate('/user/userHomepage');
+      } else if (role === 'provider') {
+        navigate('/serviceprovider/serviceproviderHomepage');
+      } else {
+        toast.error('Unknown user role');
+      }
+
+    } catch (error) {
+      console.error(error);
+      // Backend 403 handling (in case frontend check missed something)
+      if (error.response?.status === 403) {
+        setModalMessage(error.response.data.error || 'Your account is not verified yet. Please wait for admin approval.')
+        setShowModal(true)
+      } else {
+        toast.error(error.response?.data?.error || 'Error logging in');
+      }
     }
   };
+
+  const closeModal = () => setShowModal(false);
+
   return (
     <div>
-    <Navbar />
-    <div className="h-[40rem] rounded-md bg-neutral-900 flex flex-col items-center justify-center relative w-full">
-    <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black z-20">
-      <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
-        Login here
-      </h2>
-      
- 
-      <form className="my-8" onSubmit={handleSubmit}>
-       
-       
-        <LabelInputContainer className="mb-8">
-          <Label htmlFor="twitterpassword">Username</Label>
-          <Input
-            id="uname"
-            placeholder="username"
-            type="text"
-             onChange={(e)=> setUsername(e.target.value)} value={username}
-          />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="password" type="password" onChange={(e) => setPassword(e.target.value)} value={password} />
-        </LabelInputContainer>
-        
- 
-        <button
-          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
-          type="submit"
-        >
-          Sign In &rarr;
-          <BottomGradient />
-        </button>
- 
-        <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
+      <Navbar />
+      <div className="h-[40rem] rounded-md bg-neutral-900 flex flex-col items-center justify-center relative w-full">
+        <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black z-20">
+          <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
+            Login here
+          </h2>
 
-      </form>
-       
-    </div>
-    <ShootingStars />
-      <StarsBackground />
+          <form className="my-8" onSubmit={handleSubmit}>
+            <LabelInputContainer className="mb-8">
+              <Label htmlFor="uname">Username</Label>
+              <Input
+                id="uname"
+                placeholder="username"
+                type="text"
+                onChange={(e) => setUsername(e.target.value)}
+                value={username}
+              />
+            </LabelInputContainer>
+
+            <LabelInputContainer className="mb-4">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                placeholder="password"
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+            </LabelInputContainer>
+
+            <button
+              className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
+              type="submit"
+            >
+              Sign In &rarr;
+              <BottomGradient />
+            </button>
+
+            <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
+          </form>
+        </div>
+        <ShootingStars />
+        <StarsBackground />
       </div>
-    <Footer />
+      <Footer />
+
+      {/* ✅ Modal for unverified provider */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-black rounded-xl p-6 max-w-sm w-full text-center shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Account Pending Verification</h3>
+            <p className="mb-6">{modalMessage}</p>
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
- 
+};
+
 const BottomGradient = () => {
   return (
     <>
@@ -110,7 +147,7 @@ const BottomGradient = () => {
     </>
   );
 };
- 
+
 const LabelInputContainer = ({ children, className }) => {
   return (
     <div className={cn("flex w-full flex-col space-y-2", className)}>
@@ -118,4 +155,5 @@ const LabelInputContainer = ({ children, className }) => {
     </div>
   );
 };
-export default LoginPage
+
+export default LoginPage;

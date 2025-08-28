@@ -25,13 +25,18 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    // ✅ Check verification for service providers
+    if (user.role === "service-provider" && !user.isVerified) {
+      return res.status(403).json({ error: "Your account is not verified yet. Please wait for admin approval." });
+    }
 
-    res.cookie('token', token, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" });
+
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     });
 
     return res.status(200).json({ message: "Login successful", role: user.role });
@@ -40,6 +45,7 @@ export const login = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // -------------------- CREATE CUSTOMER ACCOUNT --------------------
 export const createAccount = async (req, res) => {
