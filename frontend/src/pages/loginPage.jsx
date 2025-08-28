@@ -40,6 +40,12 @@ const LoginPage=()=> {
   } else if (role === 'user') {
     navigate('/user/userHomepage'); // Or homepage
   }
+  else if (role === 'provider') {
+    navigate('/serviceprovider/serviceproviderHomepage'); // Or homepage
+  }
+  else {
+    toast.error('Unknown user role');
+  }
     } catch (error) { 
       console.error(error);
       toast.error('Error logging in');

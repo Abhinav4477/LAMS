@@ -3,6 +3,7 @@ import { Route,Routes } from 'react-router-dom'
 import HomePage from './pages/homePage.jsx'
 import LoginPage from './pages/loginPage.jsx'
 import CreateAccount from './pages/createAccount.jsx'
+import CreateServiceProviderAccount from './pages/createserviceproviderAccount.jsx'
 import UserHomepage from './pages/user/userHomepage.jsx'
 import AdminHomepage from './pages/admin/adminHomepage.jsx'
 import AddState from './pages/admin/addstate.jsx'
@@ -17,6 +18,8 @@ import UpdateLocation from './pages/admin/updatelocation.jsx'
 import Addcategory from './pages/admin/addcategory.jsx'
 import Viewcategory from './pages/admin/viewcategories.jsx'
 import UpdateCategory from './pages/admin/updatecategory.jsx'
+import serviceproviderHomepage from './pages/serviceprovider/serviceproviderHomepage.jsx'
+
 import { Toaster } from 'react-hot-toast'
 
 const App = () => {
@@ -41,6 +44,9 @@ const App = () => {
       <Route path="/admin/addcategory" element={<Addcategory />} />
       <Route path="/admin/viewcategory" element={<Viewcategory />} />
       <Route path="/admin/updatecategory/:id" element={<UpdateCategory />} />
+      <Route path="/register/provider" element={<CreateServiceProviderAccount />} />
+      <Route path="/serviceprovider/serviceproviderHomepage" element={<serviceproviderHomepage />} />
+      
 
 
 </Routes>

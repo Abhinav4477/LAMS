@@ -1,0 +1,18 @@
+import mongoose from 'mongoose';
+
+const serviceProviderSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Category', // Name of the Category collection
+    required: true 
+  },
+  address: { type: String, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  is_verified: { type: Boolean, default: false },
+  is_available: { type: Boolean, default: true },
+}, { timestamps: true });
+
+const ServiceProvider = mongoose.model('ServiceProvider', serviceProviderSchema);
+export default ServiceProvider;
