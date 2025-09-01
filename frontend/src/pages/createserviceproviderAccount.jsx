@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import toast from "react-hot-toast";
@@ -9,7 +9,6 @@ import { Input } from "../components/ui/input";
 import { cn } from "../lib/utils";
 import { ShootingStars } from "../components/ui/shooting-stars";
 import { StarsBackground } from "../components/ui/stars-background";
-import { motion, AnimatePresence } from "framer-motion";
 
 const ServiceProviderRegister = () => {
   const [username, setUsername] = useState("");
@@ -18,38 +17,14 @@ const ServiceProviderRegister = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [category, setCategory] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [role] = useState("provider");
   const navigate = useNavigate();
-
-  // Fetch categories from backend
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get("http://localhost:5001/api/admin/getcategories");
-
-        let cats = [];
-        if (Array.isArray(res.data)) {
-          cats = res.data;
-        } else if (Array.isArray(res.data.categories)) {
-          cats = res.data.categories;
-        }
-
-        setCategories(cats);
-      } catch (err) {
-        toast.error("Failed to load categories");
-      }
-    };
-    fetchCategories();
-  }, []);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password || !name || !phone || !address || !category) {
+    if (!username || !email || !password || !name || !phone || !address) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -63,7 +38,6 @@ const ServiceProviderRegister = () => {
         name,
         phone,
         address,
-        categoryId: category,
       });
       toast.success("Service Provider registered successfully");
       navigate("/login");
@@ -76,11 +50,6 @@ const ServiceProviderRegister = () => {
 
       toast.error(message);
     }
-  };
-
-  const handleCategorySelect = (catId) => {
-    setCategory(catId);
-    setIsDropdownOpen(false);
   };
 
   return (
@@ -125,47 +94,6 @@ const ServiceProviderRegister = () => {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
-            </LabelInputContainer>
-
-            {/* Category */}
-            <LabelInputContainer className="mb-8 relative">
-              <Label>Category</Label>
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-black dark:bg-zinc-900 dark:text-white flex justify-between items-center"
-              >
-                {categories.find((c) => c._id === category)?.name || "Select"}
-                <span className="ml-2 text-gray-500">▼</span>
-              </button>
-
-              <AnimatePresence>
-                {isDropdownOpen && (
-                  <motion.ul
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute left-0 right-0 mt-1 rounded-md border border-gray-300 bg-white dark:bg-zinc-900 shadow-lg z-20 max-h-40 overflow-y-auto"
-                  >
-                    {categories.length === 0 ? (
-                      <li className="px-3 py-2 text-sm text-gray-500">No categories available</li>
-                    ) : (
-                      categories.map((c) => (
-                        <motion.li
-                          key={c._id}
-                          whileHover={{ scale: 1.05, backgroundColor: "rgba(0,0,0,0.05)" }}
-                          whileTap={{ scale: 0.95 }}
-                          className="cursor-pointer px-3 py-2 text-sm text-black dark:text-white"
-                          onClick={() => handleCategorySelect(c._id)}
-                        >
-                          {c.name}
-                        </motion.li>
-                      ))
-                    )}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
             </LabelInputContainer>
 
             {/* Email */}

@@ -139,7 +139,6 @@ const Viewsprequests = () => {
               >
                 <h3 className="text-lg font-bold">{provider.username}</h3>
                 <p>Email: {provider.email}</p>
-                <p>Category: {provider.category}</p>
                 <p>Status: {provider.isVerified ? "Verified" : "Pending"}</p>
 
                 <div className="flex gap-2 mt-4">

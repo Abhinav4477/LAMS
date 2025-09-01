@@ -468,14 +468,12 @@ export const getCategoryById = async (req, res) => {
 export const getAllServiceProviders = async (req, res) => {
   try {
     const providers = await ServiceProvider.find()
-      .populate("user", "username email")
-      .populate("category", "name");
+      .populate("user", "username email"); // only populate user info now
 
     const requests = providers.map((p) => ({
       providerId: p._id,
       username: p.user?.username || "N/A",
       email: p.user?.email || "N/A",
-      category: p.category?.name || "N/A",
       is_verified: p.is_verified,
     }));
 
@@ -485,6 +483,7 @@ export const getAllServiceProviders = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // ✅ Verify a service provider
 // PUT /api/admin/verifyserviceprovider/:id

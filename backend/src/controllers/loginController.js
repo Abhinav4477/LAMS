@@ -109,20 +109,13 @@ export const logout = async (req, res) => {
 // -------------------- CREATE SERVICE PROVIDER --------------------
 export const createServiceProvider = async (req, res) => {
   try {
-    const { name, phone, address, categoryId, username, email, password } = req.body;
+    const { name, phone, address, username, email, password } = req.body;
     console.log("Request body:", req.body);
 
     // Basic validation
-    if (!name || !phone || !address || !categoryId || !username || !email || !password) {
+    if (!name || !phone || !address || !username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-
-    // Check if category exists
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(400).json({ error: 'Invalid category ID' });
-    }
-    console.log("Category found:", category);
 
     // Check if username exists
     const existingUserByUsername = await User.findOne({ username });
@@ -150,12 +143,11 @@ export const createServiceProvider = async (req, res) => {
     const savedUser = await newUser.save();
     console.log("User saved:", savedUser._id);
 
-    // Create service provider
+    // Create service provider (without category)
     const newProvider = new ServiceProvider({
       name,
       phone,
       address,
-      category: categoryId,
       user: savedUser._id,
       is_verified: false,
       is_available: true,
@@ -173,7 +165,10 @@ export const createServiceProvider = async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log("Email sent to provider");
 
-    res.status(201).json({ message: 'Service Provider created successfully', provider: newProvider });
+    res.status(201).json({
+      message: 'Service Provider created successfully',
+      provider: newProvider,
+    });
 
   } catch (error) {
     console.error("Error in createServiceProvider:", error);
