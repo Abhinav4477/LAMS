@@ -1,6 +1,7 @@
 import express from "express"
 import loginRoutes from "./routes/authenticationRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js";
+import serviceproviderRoutes from "./routes/serviceproviderRoutes.js";
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -27,6 +28,7 @@ app.use(cookieParser()); // Middleware to parse cookies
 
 app.use("/api/auth",loginRoutes);
 app.use("/api/admin",adminRoutes);
+app.use("/api/provider",serviceproviderRoutes);
 
 //connecting to the database and then starting the server
 connectDB().then(()=>{

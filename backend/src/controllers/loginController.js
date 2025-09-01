@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';
 import Customer from '../models/Customer.js';
 import ServiceProvider from '../models/ServiceProvider.js';
-import Category from '../models/Category.js';
 import transporter from '../confg/nodemailer.js';
 
 // -------------------- LOGIN --------------------
@@ -28,13 +27,21 @@ export const login = async (req, res) => {
     // generate token if you use JWT
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    res.json({
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      is_verified, // ✅ send this field
-      token,
-    });
+    // send token in httpOnly cookie and in response body
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      })
+      .json({
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        is_verified, // send verification status
+        token,       // include for frontend if needed
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
