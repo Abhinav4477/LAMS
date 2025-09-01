@@ -1,5 +1,6 @@
 import express from "express"
 import loginRoutes from "./routes/authenticationRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -12,10 +13,7 @@ const app=express();
 //setting the port to connect
 const PORT=process.env.PORT || 5001;
 
-
-
-//connecting to the database
-connectDB();
+//middlewares
 
 app.use(cors({
     credentials:true,
@@ -28,9 +26,16 @@ app.use(cookieParser()); // Middleware to parse cookies
 //redirecting the requests to the corresponding Routes
 
 app.use("/api/auth",loginRoutes);
+app.use("/api/admin",adminRoutes);
 
-
-app.listen(5001,()=>{
+//connecting to the database and then starting the server
+connectDB().then(()=>{
+    console.log("Connected to the Database");
+    app.listen(5001,()=>{
     console.log("Server Started at PORT "+PORT);
 })
+}).catch((err)=>{
+    console.log("Error connecting to the Database",err);
+})
+
 
