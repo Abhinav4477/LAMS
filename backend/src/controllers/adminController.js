@@ -340,26 +340,18 @@ export const getLocationById = async (req, res) => {
 
 // Get locations filtered by district (and optionally by state)
 export const getLocationsByDistrict = async (req, res) => {
-  try {
-    const { districtId } = req.params; // get districtId from URL param
-
-    if (!districtId) {
-      return res.status(400).json({ message: "District ID is required" });
-    }
-
-    // Fetch locations that belong to this district
-    const locations = await Location.find({ district: districtId }).populate({
-      path: "district",
-      populate: { path: "state" },
-    });
-
-    res.json(locations);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch locations" });
-  }
+ try {
+ const { districtId } = req.params; // get districtId from URL param
+ if (!districtId)
+ { return res.status(400).json({ message: "District ID is required" }); } // Fetch locations that belong to this district 
+const locations = await Location.find({ district: districtId }).populate({ path: "district",
+ populate: { path: "state" }, 
+});
+ res.json(locations); }
+ catch (error)
+ { console.error(error); res.status(500).json({ message: "Failed to fetch locations" });
+ } 
 };
-
 //Function to add a new category
 export const addCategory = async (req, res) => {
   const { name } = req.body;
