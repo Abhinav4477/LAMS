@@ -1,11 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, MenuItem, ProductItem } from "../ui/navbar-menu";
 import { cn } from "../../lib/utils";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 function Navbar({ className }) {
   const [active, setActive] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const navigate = useNavigate();
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get(
+          "http://localhost:5001/api/provider/account/me",
+          { withCredentials: true }
+        );
+        setIsAuthenticated(true);
+      } catch (err) {
+        setIsAuthenticated(false);
+        navigate("/login", { replace: true }); // redirect if not logged in
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        "http://localhost:5001/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
+
+      setIsAuthenticated(false);
+      setActive(null);
+      toast.success("Logged out successfully");
+
+      navigate("/login", { replace: true }); // redirect with replace to clear history
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout");
+    }
+  };
+
+  // Hide menu if user is not authenticated
+  if (!isAuthenticated) return null;
 
   return (
     <div
@@ -14,9 +56,7 @@ function Navbar({ className }) {
         className
       )}
     >
-      {/* Navbar "oval" background */}
       <div className="bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-between px-6 py-2 shadow-lg">
-        
         {/* Logo + LAMS text */}
         <Link
           to="/serviceprovider/serviceproviderhomepage"
@@ -33,6 +73,7 @@ function Navbar({ className }) {
         {/* Menu */}
         <div className="flex-1 ml-6">
           <Menu setActive={setActive}>
+            {/* Services Menu */}
             <MenuItem setActive={setActive} active={active} item="Services">
               <div className="flex flex-col space-y-4 text-sm">
                 <span
@@ -45,15 +86,14 @@ function Navbar({ className }) {
                   onClick={() => navigate("/serviceprovider/viewservices")}
                   className="cursor-pointer hover:text-blue-400"
                 >
-                 View Services
+                  View Services
                 </span>
-               
               </div>
             </MenuItem>
 
+            {/* Products Menu */}
             <MenuItem setActive={setActive} active={active} item="Products">
               <div className="text-sm grid grid-cols-2 gap-10 p-4">
-                {/* External links can remain as <a> */}
                 <ProductItem
                   title="Algochurn"
                   href="https://algochurn.com"
@@ -81,31 +121,20 @@ function Navbar({ className }) {
               </div>
             </MenuItem>
 
-            <MenuItem setActive={setActive} active={active} item="Pricing">
+            {/* Account Menu */}
+            <MenuItem setActive={setActive} active={active} item="Account">
               <div className="flex flex-col space-y-4 text-sm">
                 <span
-                  onClick={() => navigate("/hobby")}
+                  onClick={() => navigate("/serviceprovider/spaccount")}
                   className="cursor-pointer hover:text-blue-400"
                 >
-                  Hobby
+                  About
                 </span>
                 <span
-                  onClick={() => navigate("/individual")}
+                  onClick={handleLogout}
                   className="cursor-pointer hover:text-blue-400"
                 >
-                  Individual
-                </span>
-                <span
-                  onClick={() => navigate("/team")}
-                  className="cursor-pointer hover:text-blue-400"
-                >
-                  Team
-                </span>
-                <span
-                  onClick={() => navigate("/enterprise")}
-                  className="cursor-pointer hover:text-blue-400"
-                >
-                  Enterprise
+                  LogOut
                 </span>
               </div>
             </MenuItem>

@@ -1,6 +1,8 @@
 import Service from "../models/Service.js";
 import Category from "../models/Category.js";
 import Location from "../models/Location.js";
+import User from "../models/Users.js";
+import ServiceProvider from "../models/ServiceProvider.js";
 import mongoose from "mongoose";
 
 
@@ -133,6 +135,85 @@ export const updateServiceById = async (req, res) => {
     res.status(200).json({ message: "Service updated", service });
   } catch (err) {
     console.error("Update service error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+//Function to get Service Provider Profile
+// ✅ Get logged-in service provider profile (with user details)
+export const getServiceProviderProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const serviceProvider = await ServiceProvider.findOne({ user: userId })
+      .populate("user", "email") // only get email from User
+      .lean(); // convert to plain JS object for easy manipulation
+
+    if (!serviceProvider) {
+      return res
+        .status(404)
+        .json({ error: "Service provider profile not found" });
+    }
+
+    // Remove _id and user ObjectId, keep all other serviceProvider fields
+    const { _id, user, __v, ...providerData } = serviceProvider;
+
+    // Return email separately
+    const response = {
+      ...providerData,
+      email: user.email, // read-only
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Get service provider profile error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+//Function to update Service Provider Profile
+export const updateServiceProviderProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id; // from auth middleware
+    const { name, phone, address } = req.body; // email removed from editable fields
+
+    // Validate required fields
+    if (!name || !phone || !address) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Update ServiceProvider details
+    const serviceProvider = await ServiceProvider.findOneAndUpdate(
+      { user: userId },
+      { name, phone, address },
+      { new: true }
+    ).populate("user", "email"); // only get email, read-only
+
+    if (!serviceProvider) {
+      return res
+        .status(404)
+        .json({ error: "Service provider profile not found" });
+    }
+
+    // Return profile with email from User collection
+    const { _id, user, __v, ...providerData } = serviceProvider.toObject();
+    const response = {
+      ...providerData,
+      email: user.email,
+    };
+
+    res.status(200).json({
+      message: "Profile updated",
+      profile: response,
+    });
+  } catch (err) {
+    console.error("Update service provider profile error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
