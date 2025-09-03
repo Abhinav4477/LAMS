@@ -13,6 +13,9 @@ const UpdateService = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [originalImage, setOriginalImage] = useState("");
 
   // Dropdowns
   const [categories, setCategories] = useState([]);
@@ -26,7 +29,7 @@ const UpdateService = () => {
   const [locationId, setLocationId] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [originalData, setOriginalData] = useState({}); // store original service data
+  const [originalData, setOriginalData] = useState({});
 
   // Fetch categories & states
   useEffect(() => {
@@ -54,6 +57,13 @@ const UpdateService = () => {
         const serviceRes = await axios.get(`http://localhost:5001/api/provider/service/${id}`, { withCredentials: true });
         const service = serviceRes.data;
 
+        setName(service.name);
+        setDescription(service.description);
+        setPrice(service.price);
+        setCategoryId(service.category?._id || "");
+        setLocationId(service.location?._id || "");
+        setOriginalImage(service.coverImage || "");
+
         const initialData = {
           name: service.name,
           description: service.description,
@@ -61,14 +71,8 @@ const UpdateService = () => {
           categoryId: service.category?._id || "",
           locationId: service.location?._id || "",
           stateId: "",
-          districtId: ""
+          districtId: "",
         };
-
-        setName(initialData.name);
-        setDescription(initialData.description);
-        setPrice(initialData.price);
-        setCategoryId(initialData.categoryId);
-        setLocationId(initialData.locationId);
 
         if (!service.location) {
           setOriginalData(initialData);
@@ -99,7 +103,7 @@ const UpdateService = () => {
           setLocations(Array.isArray(locationsRes.data) ? locationsRes.data : []);
         }
 
-        setOriginalData(initialData); // save original service data
+        setOriginalData(initialData);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load service details");
@@ -151,29 +155,39 @@ const UpdateService = () => {
     fetchLocations();
   }, [districtId]);
 
+  // Handle cover image selection & preview
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setCoverImage(file);
+    setPreview(file ? URL.createObjectURL(file) : null);
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `http://localhost:5001/api/provider/service/${id}`,
-        { name, description, price, categoryId, locationId },
-        { withCredentials: true }
-      );
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("categoryId", categoryId);
+      formData.append("locationId", locationId);
+      if (coverImage) formData.append("coverImage", coverImage);
+
+      await axios.put(`http://localhost:5001/api/provider/service/${id}`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       toast.success("Service updated successfully");
       navigate("/serviceprovider/viewservices");
     } catch (err) {
       console.error("Update service error:", err);
-      if (err.response && err.response.status === 400) {
-        toast.error(err.response.data.error || "Bad request");
-      } else {
-        toast.error("Failed to update service");
-      }
+      toast.error(err.response?.data?.error || "Failed to update service");
     }
   };
 
   const handleCancel = () => navigate("/serviceprovider/viewservices");
 
-  // Disable button if nothing changed
   const isUnchanged =
     name === originalData.name &&
     description === originalData.description &&
@@ -181,7 +195,8 @@ const UpdateService = () => {
     categoryId === originalData.categoryId &&
     stateId === originalData.stateId &&
     districtId === originalData.districtId &&
-    locationId === originalData.locationId;
+    locationId === originalData.locationId &&
+    !coverImage;
 
   if (loading) {
     return (
@@ -201,7 +216,10 @@ const UpdateService = () => {
       <div className="flex-grow pt-32 pb-16 px-4 sm:px-6 lg:px-8 w-full max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-white text-center mb-10">Update Service</h1>
 
-        <form className="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl space-y-6 w-full" onSubmit={handleUpdate}>
+        <form
+          className="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl space-y-6 w-full"
+          onSubmit={handleUpdate}
+        >
           {/* Service Name */}
           <div>
             <label className="block text-gray-300 mb-2">Service Name</label>
@@ -238,70 +256,98 @@ const UpdateService = () => {
             />
           </div>
 
-          {/* Category */}
-          <div>
-            <label className="block text-gray-300 mb-2">Category</label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-              className="w-full p-3 rounded-lg bg-gray-700 text-white"
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
-              ))}
-            </select>
+          {/* Category, State, District, Location */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-300 mb-2">Category</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                required
+                className="w-full p-3 rounded-lg bg-gray-700 text-white"
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 mb-2">State</label>
+              <select
+                value={stateId}
+                onChange={(e) => setStateId(e.target.value)}
+                required
+                className="w-full p-3 rounded-lg bg-gray-700 text-white"
+              >
+                <option value="">Select State</option>
+                {states.map((st) => (
+                  <option key={st._id} value={st._id}>{st.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 mb-2">District</label>
+              <select
+                value={districtId}
+                onChange={(e) => setDistrictId(e.target.value)}
+                required
+                disabled={!stateId}
+                className="w-full p-3 rounded-lg bg-gray-700 text-white disabled:opacity-50"
+              >
+                <option value="">Select District</option>
+                {districts.map((dist) => (
+                  <option key={dist._id} value={dist._id}>{dist.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-300 mb-2">Location</label>
+              <select
+                value={locationId}
+                onChange={(e) => setLocationId(e.target.value)}
+                required
+                disabled={!districtId}
+                className="w-full p-3 rounded-lg bg-gray-700 text-white disabled:opacity-50"
+              >
+                <option value="">Select Location</option>
+                {locations.map((loc) => (
+                  <option key={loc._id} value={loc._id}>{loc.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* State */}
-          <div>
-            <label className="block text-gray-300 mb-2">State</label>
-            <select
-              value={stateId}
-              onChange={(e) => setStateId(e.target.value)}
-              required
-              className="w-full p-3 rounded-lg bg-gray-700 text-white"
-            >
-              <option value="">Select State</option>
-              {states.map((st) => (
-                <option key={st._id} value={st._id}>{st.name}</option>
-              ))}
-            </select>
-          </div>
+          {/* Image Preview */}
+          {(preview || originalImage) && (
+            <div className="flex justify-center mb-4">
+              <img
+                src={preview || `http://localhost:5001/${originalImage}`}
+                alt="Preview"
+                className="w-48 h-48 object-cover rounded-xl border border-gray-600"
+              />
+            </div>
+          )}
 
-          {/* District */}
+          {/* Cover Image Upload */}
           <div>
-            <label className="block text-gray-300 mb-2">District</label>
-            <select
-              value={districtId}
-              onChange={(e) => setDistrictId(e.target.value)}
-              required
-              disabled={!stateId}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white disabled:opacity-50"
+            <label className="block text-gray-300 mb-2">Cover Image</label>
+            <div
+              onClick={() => document.getElementById("coverInput").click()}
+              className="w-full h-32 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-700 hover:border-blue-500 transition"
             >
-              <option value="">Select District</option>
-              {districts.map((dist) => (
-                <option key={dist._id} value={dist._id}>{dist.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-gray-300 mb-2">Location</label>
-            <select
-              value={locationId}
-              onChange={(e) => setLocationId(e.target.value)}
-              required
-              disabled={!districtId}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white disabled:opacity-50"
-            >
-              <option value="">Select Location</option>
-              {locations.map((loc) => (
-                <option key={loc._id} value={loc._id}>{loc.name}</option>
-              ))}
-            </select>
+              <span className="text-gray-400">Click to upload image</span>
+              <input
+                type="file"
+                id="coverInput"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </div>
           </div>
 
           {/* Buttons */}
