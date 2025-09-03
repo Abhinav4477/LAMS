@@ -2,22 +2,21 @@ import Service from "../models/Service.js";
 import Category from "../models/Category.js";
 import Location from "../models/Location.js";
 import User from "../models/Users.js";
+import path from "path";
+import fs from "fs";
 import ServiceProvider from "../models/ServiceProvider.js";
 import mongoose from "mongoose";
 
-
-// Create a new service
-
+// Create a new service with optional cover image
 export const createService = async (req, res) => {
   try {
     const { name, description, price, categoryId, locationId } = req.body;
-    const userId = req.user?.id; // make sure req.user exists
+    const userId = req.user?.id;
 
     if (!name || !description || !price || !categoryId || !locationId) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Check category & location exist
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).json({ error: "Invalid category" });
 
@@ -31,6 +30,7 @@ export const createService = async (req, res) => {
       category: category._id,
       location: location._id,
       provider: userId,
+      coverImage: req.file ? req.file.path : "", // store uploaded image path
     });
 
     const savedService = await service.save();
@@ -41,10 +41,10 @@ export const createService = async (req, res) => {
   }
 };
 
-//function to get services by provider
+// Get all services by provider (returns coverImage path)
 export const getServicesByProvider = async (req, res) => {
   try {
-    const userId = req.user?.id; // make sure req.user exists
+    const userId = req.user?.id;
     const services = await Service.find({ provider: userId })
       .populate("category", "name")
       .populate("location", "name")
@@ -53,26 +53,39 @@ export const getServicesByProvider = async (req, res) => {
   } catch (err) {
     console.error("Get services by provider error:", err);
     res.status(500).json({ error: "Internal server error" });
-  } 
+  }
 };
 
-//delete service function
+// Delete a service by ID
 export const deleteService = async (req, res) => {
   try {
     const serviceId = req.params.id;
-    const userId = req.user?.id; // make sure req.user exists
-    const service = await Service.findOneAndDelete({ _id: serviceId, provider: userId });
+    const userId = req.user?.id;
+
+    // Find the service first (so we know the cover image path)
+    const service = await Service.findOne({ _id: serviceId, provider: userId });
     if (!service) {
       return res.status(404).json({ error: "Service not found or unauthorized" });
     }
-    res.status(200).json({ message: "Service deleted" });
+
+    // Delete the cover image from disk if it exists
+    if (service.coverImage) {
+      fs.unlink(service.coverImage, (err) => {
+        if (err) console.error("Failed to delete cover image:", err);
+      });
+    }
+
+    // Delete the service document from DB
+    await Service.findByIdAndDelete(serviceId);
+
+    res.status(200).json({ message: "Service and cover image deleted" });
   } catch (err) {
     console.error("Delete service error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-//Function to get service by id
+// Get service by ID (returns coverImage path)
 export const getServiceById = async (req, res) => {
   try {
     const serviceId = req.params.id;
@@ -94,79 +107,78 @@ export const getServiceById = async (req, res) => {
   }
 };
 
-
-//Function to update service by id
+// Update a service by ID with optional cover image
 export const updateServiceById = async (req, res) => {
   try {
     const serviceId = req.params.id;
-    const userId = req.user?.id; // ensure req.user exists
+    const userId = req.user?.id;
     const { name, description, price, categoryId, locationId } = req.body;
 
-    // Validate required fields
     if (!name || !description || !price || !categoryId || !locationId) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Check if category exists
     const category = await Category.findById(categoryId);
     if (!category) return res.status(400).json({ error: "Invalid category" });
 
-    // Check if location exists
     const location = await Location.findById(locationId);
     if (!location) return res.status(400).json({ error: "Invalid location" });
 
-    // Update the service
-    const service = await Service.findOneAndUpdate(
-      { _id: serviceId, provider: userId },
-      {
-        name,
-        description,
-        price,
-        category: category._id.toString(), // ensure string
-        location: location._id.toString(), // ensure string
-      },
-      { new: true }
-    );
-
+    const service = await Service.findOne({ _id: serviceId, provider: userId });
     if (!service) {
       return res.status(404).json({ error: "Service not found or unauthorized" });
     }
 
-    res.status(200).json({ message: "Service updated", service });
+    // Prepare updated data
+    const updatedData = {
+      name,
+      description,
+      price,
+      category: category._id.toString(),
+      location: location._id.toString(),
+    };
+
+    // Handle new cover image
+    if (req.file) {
+      // Delete old image safely
+      if (service.coverImage) {
+        const oldPath = path.join(process.cwd(), service.coverImage);
+        fs.access(oldPath, fs.constants.F_OK, (err) => {
+          if (!err) {
+            fs.unlink(oldPath, (err) => {
+              if (err) console.error("Failed to delete old image:", err);
+            });
+          }
+        });
+      }
+      updatedData.coverImage = req.file.path;
+    }
+
+    // Update service
+    const updatedService = await Service.findByIdAndUpdate(serviceId, updatedData, { new: true });
+
+    res.status(200).json({ message: "Service updated", service: updatedService });
   } catch (err) {
     console.error("Update service error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-//Function to get Service Provider Profile
-// ✅ Get logged-in service provider profile (with user details)
+// Get service provider profile
 export const getServiceProviderProfile = async (req, res) => {
   try {
     const userId = req.user?.id;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const serviceProvider = await ServiceProvider.findOne({ user: userId })
-      .populate("user", "email") // only get email from User
-      .lean(); // convert to plain JS object for easy manipulation
+      .populate("user", "email")
+      .lean();
 
-    if (!serviceProvider) {
-      return res
-        .status(404)
-        .json({ error: "Service provider profile not found" });
-    }
+    if (!serviceProvider) return res.status(404).json({ error: "Service provider profile not found" });
 
-    // Remove _id and user ObjectId, keep all other serviceProvider fields
     const { _id, user, __v, ...providerData } = serviceProvider;
-
-    // Return email separately
-    const response = {
-      ...providerData,
-      email: user.email, // read-only
-    };
+    const response = { ...providerData, email: user.email };
 
     res.status(200).json(response);
   } catch (err) {
@@ -175,43 +187,26 @@ export const getServiceProviderProfile = async (req, res) => {
   }
 };
 
-
-
-//Function to update Service Provider Profile
+// Update service provider profile
 export const updateServiceProviderProfile = async (req, res) => {
   try {
-    const userId = req.user?.id; // from auth middleware
-    const { name, phone, address } = req.body; // email removed from editable fields
+    const userId = req.user?.id;
+    const { name, phone, address } = req.body;
 
-    // Validate required fields
-    if (!name || !phone || !address) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
+    if (!name || !phone || !address) return res.status(400).json({ error: "All fields are required" });
 
-    // Update ServiceProvider details
     const serviceProvider = await ServiceProvider.findOneAndUpdate(
       { user: userId },
       { name, phone, address },
       { new: true }
-    ).populate("user", "email"); // only get email, read-only
+    ).populate("user", "email");
 
-    if (!serviceProvider) {
-      return res
-        .status(404)
-        .json({ error: "Service provider profile not found" });
-    }
+    if (!serviceProvider) return res.status(404).json({ error: "Service provider profile not found" });
 
-    // Return profile with email from User collection
     const { _id, user, __v, ...providerData } = serviceProvider.toObject();
-    const response = {
-      ...providerData,
-      email: user.email,
-    };
+    const response = { ...providerData, email: user.email };
 
-    res.status(200).json({
-      message: "Profile updated",
-      profile: response,
-    });
+    res.status(200).json({ message: "Profile updated", profile: response });
   } catch (err) {
     console.error("Update service provider profile error:", err);
     res.status(500).json({ error: "Internal server error" });

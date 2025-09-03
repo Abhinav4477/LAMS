@@ -1,43 +1,40 @@
-import express from "express"
-import loginRoutes from "./routes/authenticationRoutes.js"
+import express from "express";
+import loginRoutes from "./routes/authenticationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import serviceproviderRoutes from "./routes/serviceproviderRoutes.js";
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+
 dotenv.config();
 
-//created the app object
-const app=express();
+const app = express();
+const PORT = process.env.PORT || 5001;
 
-//setting the port to connect
-const PORT=process.env.PORT || 5001;
-
-//middlewares
-
+// Middlewares
 app.use(cors({
-    credentials:true,
-    origin:"http://localhost:5173" // Allow requests from the frontend
-    }))
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(cookieParser()); // Middleware to parse cookies
+  credentials: true,
+  origin: "http://localhost:5173"
+}));
+app.use(express.json());
+app.use(cookieParser());
 
+// Serve uploaded images
+app.use("/upload", express.static(path.join(path.resolve(), "upload")));
 
-//redirecting the requests to the corresponding Routes
+// Routes
+app.use("/api/auth", loginRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/provider", serviceproviderRoutes);
 
-app.use("/api/auth",loginRoutes);
-app.use("/api/admin",adminRoutes);
-app.use("/api/provider",serviceproviderRoutes);
-
-//connecting to the database and then starting the server
-connectDB().then(()=>{
-    console.log("Connected to the Database");
-    app.listen(5001,()=>{
-    console.log("Server Started at PORT "+PORT);
-})
-}).catch((err)=>{
-    console.log("Error connecting to the Database",err);
-})
-
-
+// Connect DB and start server
+connectDB().then(() => {
+  console.log("Connected to the Database");
+  app.listen(PORT, () => {
+    console.log("Server Started at PORT " + PORT);
+  });
+}).catch((err) => {
+  console.log("Error connecting to the Database", err);
+});

@@ -12,6 +12,8 @@ const AddService = () => {
   const [districtId, setDistrictId] = useState("");
   const [locationId, setLocationId] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -50,7 +52,6 @@ const AddService = () => {
       setLocationId("");
       return;
     }
-
     const fetchDistricts = async () => {
       try {
         const res = await axios.get(`http://localhost:5001/api/admin/getdistricts/${stateId}`, { withCredentials: true });
@@ -73,7 +74,6 @@ const AddService = () => {
       setLocationId("");
       return;
     }
-
     const fetchLocations = async () => {
       try {
         const res = await axios.get(`http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`, { withCredentials: true });
@@ -87,6 +87,13 @@ const AddService = () => {
     fetchLocations();
   }, [districtId]);
 
+  // Handle cover image selection and preview
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setCoverImage(file);
+    setPreview(file ? URL.createObjectURL(file) : null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !description || !price || !categoryId || !locationId) {
@@ -95,11 +102,21 @@ const AddService = () => {
 
     try {
       setSubmitting(true);
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("categoryId", categoryId);
+      formData.append("locationId", locationId);
+      if (coverImage) formData.append("coverImage", coverImage);
+
       await axios.post(
         "http://localhost:5001/api/provider/service",
-        { name, description, price, categoryId, locationId },
-        { withCredentials: true }
+        formData,
+        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );
+
       toast.success("Service created successfully!");
       setName("");
       setDescription("");
@@ -108,6 +125,8 @@ const AddService = () => {
       setStateId("");
       setDistrictId("");
       setLocationId("");
+      setCoverImage(null);
+      setPreview(null);
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.error || "Something went wrong");
@@ -231,6 +250,39 @@ const AddService = () => {
                   <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
               </select>
+            </div>
+
+            {/* Cover Image */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">Cover Image</label>
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-lg p-4 bg-gray-900 cursor-pointer hover:border-blue-500 transition-colors relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute w-full h-full opacity-0 cursor-pointer"
+                />
+                {!preview ? (
+                  <p className="text-gray-400 text-center">
+                    Click or drag to upload a cover image
+                  </p>
+                ) : (
+                  <div className="relative">
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="w-48 h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setCoverImage(null); setPreview(null); }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Submit */}
