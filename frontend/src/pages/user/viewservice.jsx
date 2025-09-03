@@ -23,13 +23,16 @@ const ViewServices = () => {
   const [locationId, setLocationId] = useState("");
   const [sortBy, setSortBy] = useState("latest");
 
-  // Fetch dropdown data once
+  // Axios config for cookie auth
+  const axiosConfig = { withCredentials: true };
+
+  // Fetch dropdowns
   useEffect(() => {
     const fetchDropdowns = async () => {
       try {
         const [catRes, stateRes] = await Promise.all([
-          axios.get("http://localhost:5001/api/admin/getcategories"),
-          axios.get("http://localhost:5001/api/admin/getstates"),
+          axios.get("http://localhost:5001/api/admin/getcategories", axiosConfig),
+          axios.get("http://localhost:5001/api/admin/getstates", axiosConfig),
         ]);
         setCategories(catRes.data);
         setStates(stateRes.data);
@@ -47,11 +50,14 @@ const ViewServices = () => {
       if (!stateId) {
         setDistricts([]);
         setDistrictId("");
+        setLocations([]);
+        setLocationId("");
         return;
       }
       try {
         const res = await axios.get(
-          `http://localhost:5001/api/admin/getdistricts/${stateId}`
+          `http://localhost:5001/api/admin/getdistricts/${stateId}`,
+          axiosConfig
         );
         setDistricts(res.data);
         setDistrictId("");
@@ -75,7 +81,8 @@ const ViewServices = () => {
       }
       try {
         const res = await axios.get(
-          `http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`
+          `http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`,
+          axiosConfig
         );
         setLocations(res.data);
         setLocationId("");
@@ -87,17 +94,18 @@ const ViewServices = () => {
     fetchLocations();
   }, [districtId]);
 
-  // Fetch services function
+  // Fetch services
   const fetchServices = async () => {
     try {
       setLoading(true);
       const res = await axios.get("http://localhost:5001/api/user/services", {
         params: { categoryId, stateId, districtId, locationId, sortBy },
+        ...axiosConfig,
       });
       setServices(res.data);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load services");
+      toast.error("Failed to load services. Make sure you are logged in.");
     } finally {
       setLoading(false);
     }
@@ -113,17 +121,15 @@ const ViewServices = () => {
       <NavbarDemo />
       <Toaster />
 
-      <main className="flex-1 p-6">
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Available Services
-        </h1>
+      <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-6">Available Services</h1>
 
         {/* Filters */}
-        <div className="bg-gray-800 p-4 rounded-xl shadow mb-6 flex flex-wrap gap-4 items-center justify-center">
+        <div className="bg-gray-800 p-4 rounded-xl shadow mb-6 flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center items-center">
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
@@ -134,7 +140,7 @@ const ViewServices = () => {
           <select
             value={stateId}
             onChange={(e) => setStateId(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
           >
             <option value="">All States</option>
             {states.map((s) => (
@@ -146,7 +152,7 @@ const ViewServices = () => {
             value={districtId}
             onChange={(e) => setDistrictId(e.target.value)}
             disabled={!stateId}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto"
           >
             <option value="">All Districts</option>
             {districts.map((d) => (
@@ -158,7 +164,7 @@ const ViewServices = () => {
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
             disabled={!districtId}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto"
           >
             <option value="">All Locations</option>
             {locations.map((loc) => (
@@ -169,7 +175,7 @@ const ViewServices = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
           >
             <option value="latest">Latest</option>
             <option value="priceAsc">Price: Low → High</option>
@@ -178,7 +184,7 @@ const ViewServices = () => {
 
           <button
             onClick={fetchServices}
-            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition"
+            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition w-full sm:w-auto"
           >
             Apply Filters
           </button>
@@ -190,7 +196,7 @@ const ViewServices = () => {
         ) : services.length === 0 ? (
           <p className="text-center text-lg">No services found</p>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
               <div
                 key={service._id}
