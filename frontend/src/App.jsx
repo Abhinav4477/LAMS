@@ -24,6 +24,8 @@ import AddService from './pages/serviceprovider/addservice.jsx'
 import ViewServices from './pages/serviceprovider/viewservice.jsx'
 import UpdateService from './pages/serviceprovider/updateservice.jsx'
 import SPAccount from './pages/serviceprovider/spaccount.jsx'
+import ViewService from './pages/user/viewservice.jsx'
+import ServiceView from './pages/user/serviceviewmore.jsx'
 
 import { Toaster } from 'react-hot-toast'
 
@@ -56,6 +58,9 @@ const App = () => {
       <Route path="/serviceprovider/viewservices" element={<ViewServices />} />
       <Route path="/serviceprovider/updateservice/:id" element={<UpdateService />} />
       <Route path="/serviceprovider/spaccount" element={<SPAccount />} />
+      <Route path="/user/viewservices" element={<ViewService />} />
+      <Route path="/user/serviceviewmore/:id" element={<ServiceView />} />
+
       
 
 

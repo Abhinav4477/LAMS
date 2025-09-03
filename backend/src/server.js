@@ -2,6 +2,7 @@ import express from "express";
 import loginRoutes from "./routes/authenticationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import serviceproviderRoutes from "./routes/serviceproviderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -28,6 +29,7 @@ app.use("/upload", express.static(path.join(path.resolve(), "upload")));
 app.use("/api/auth", loginRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/provider", serviceproviderRoutes);
+app.use("/api/user", userRoutes);
 
 // Connect DB and start server
 connectDB().then(() => {
