@@ -5,6 +5,7 @@ import { getServiceById } from "../controllers/userController.js";
 import { createServiceRequest } from "../controllers/userController.js";
 import { authenticateUser } from "../middleware/auth.js";
 import { checkServiceRequest } from "../controllers/userController.js";
+import { getMyRequests } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -19,5 +20,9 @@ router.post("/service-request", authenticateUser, createServiceRequest);
 
 //route to check requests already exists
 router.get("/check/:id", authenticateUser, checkServiceRequest);
+
+//route to get the requests of a user
+
+router.get("/service-request/my-requests",authenticateUser,getMyRequests);
 
 export default router;

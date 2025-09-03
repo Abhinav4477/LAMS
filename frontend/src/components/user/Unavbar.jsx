@@ -10,33 +10,61 @@ import {
   MobileNavMenu,
 } from "../ui/resizable-navbar";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NavbarDemo = () => {
+  const navigate = useNavigate();
+
   const navItems = [
-    { name: "Features", link: "#features" },
-    { name: "Pricing", link: "#pricing" },
-    { name: "Contact", link: "#contact" },
+    { name: "Services", link: "/user/viewservices" },
+    { name: "My Requests", link: "/user/viewrequests" },
+    { name: "Contact", link: "/#contact" },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Function to handle navigation and close mobile menu if open
+  const handleNavigate = (link) => {
+    navigate(link);
+    if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+  };
 
   return (
     <div className="relative w-full">
       <Navbar>
         {/* Desktop Navigation */}
         <NavBody>
-          <NavbarLogo />
-          <NavItems items={navItems} />
+          <div
+            onClick={() => handleNavigate("/user/userHomepage")}
+            className="cursor-pointer"
+          >
+            <NavbarLogo />
+          </div>
+          <NavItems
+            items={navItems.map((item) => ({
+              ...item,
+              onClick: () => handleNavigate(item.link),
+            }))}
+          />
           <div className="flex items-center gap-4">
-            <NavbarButton variant="secondary">Login</NavbarButton>
-            <NavbarButton variant="primary">Book a call</NavbarButton>
+            <NavbarButton onClick={() => handleNavigate("/login")} variant="secondary">
+              Login
+            </NavbarButton>
+            <NavbarButton onClick={() => handleNavigate("/book")} variant="primary">
+              Book a call
+            </NavbarButton>
           </div>
         </NavBody>
 
         {/* Mobile Navigation */}
         <MobileNav>
           <MobileNavHeader>
-            <NavbarLogo />
+            <div
+              onClick={() => handleNavigate("/user/userHomepage")}
+              className="cursor-pointer"
+            >
+              <NavbarLogo />
+            </div>
             <MobileNavToggle
               isOpen={isMobileMenuOpen}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -48,25 +76,25 @@ const NavbarDemo = () => {
             onClose={() => setIsMobileMenuOpen(false)}
           >
             {navItems.map((item, idx) => (
-              <a
+              <button
                 key={`mobile-link-${idx}`}
-                href={item.link}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="relative text-neutral-300 hover:text-white"
+                onClick={() => handleNavigate(item.link)}
+                className="relative text-neutral-300 hover:text-white text-left w-full"
               >
-                <span className="block">{item.name}</span>
-              </a>
+                {item.name}
+              </button>
             ))}
+
             <div className="flex w-full flex-col gap-4 mt-4">
               <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => handleNavigate("/login")}
                 variant="secondary"
                 className="w-full"
               >
                 Login
               </NavbarButton>
               <NavbarButton
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => handleNavigate("/book")}
                 variant="primary"
                 className="w-full"
               >

@@ -127,3 +127,34 @@ export const checkServiceRequest = async (req, res) => {
     res.status(500).json({ message: "Failed to check service request" });
   }
 };
+
+//Function to get requests of a user
+export const getMyRequests = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.user.id; // <- use `id`, not `_id`
+
+    const requests = await ServiceRequest.find({ userId })
+      .populate({
+        path: "serviceId",
+        select: "name price coverImage location",
+        populate: {
+          path: "location",
+          select: "name", // only name
+        },
+      })
+      .populate({
+        path: "providerId",
+        select: "username email",
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error fetching user requests:", error);
+    res.status(500).json({ message: "Server error while fetching requests" });
+  }
+};
