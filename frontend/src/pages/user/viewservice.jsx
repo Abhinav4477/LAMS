@@ -8,6 +8,7 @@ import Footer from "../../components/Footer";
 const ViewServices = () => {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
+  const [filteredServices, setFilteredServices] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Dropdown data
@@ -22,8 +23,8 @@ const ViewServices = () => {
   const [districtId, setDistrictId] = useState("");
   const [locationId, setLocationId] = useState("");
   const [sortBy, setSortBy] = useState("latest");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Axios config for cookie auth
   const axiosConfig = { withCredentials: true };
 
   // Fetch dropdowns
@@ -103,6 +104,7 @@ const ViewServices = () => {
         ...axiosConfig,
       });
       setServices(res.data);
+      setFilteredServices(res.data);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load services. Make sure you are logged in.");
@@ -111,25 +113,61 @@ const ViewServices = () => {
     }
   };
 
-  // Load all services initially
   useEffect(() => {
     fetchServices();
   }, []);
+
+  // Filter services by search term
+  useEffect(() => {
+    let filtered = [...services];
+    if (searchTerm) {
+      filtered = filtered.filter(service =>
+        service.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    setFilteredServices(filtered);
+  }, [searchTerm, services]);
 
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-screen">
       <NavbarDemo />
       <Toaster />
 
-      <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto">
+      <main className="flex-1 max-w-7xl mx-auto p-4 sm:p-6">
         <h1 className="text-3xl font-bold text-center mb-6">Available Services</h1>
 
-        {/* Filters */}
-        <div className="bg-gray-800 p-4 rounded-xl shadow mb-6 flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center items-center">
+        {/* Sticky Search & Filters */}
+        <div className="sticky top-24 z-40 bg-gray-900 bg-opacity-95 backdrop-blur-md p-4 rounded-xl shadow-md mb-6 flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center items-center">
+          
+          {/* Search bar */}
+          <div className="relative w-full sm:w-96">
+            <input
+              type="text"
+              placeholder="Search services by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 pl-12 rounded-2xl text-white placeholder-gray-400 bg-gray-800 focus:outline-none focus:ring-4 focus:ring-blue-500 shadow-lg transition duration-300"
+            />
+            <svg
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 3a7.5 7.5 0 006.15 13.65z"
+              />
+            </svg>
+          </div>
+
+          {/* Filters */}
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto text-white"
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
@@ -140,7 +178,7 @@ const ViewServices = () => {
           <select
             value={stateId}
             onChange={(e) => setStateId(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto text-white"
           >
             <option value="">All States</option>
             {states.map((s) => (
@@ -152,7 +190,7 @@ const ViewServices = () => {
             value={districtId}
             onChange={(e) => setDistrictId(e.target.value)}
             disabled={!stateId}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto text-white"
           >
             <option value="">All Districts</option>
             {districts.map((d) => (
@@ -164,7 +202,7 @@ const ViewServices = () => {
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
             disabled={!districtId}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50 w-full sm:w-auto text-white"
           >
             <option value="">All Locations</option>
             {locations.map((loc) => (
@@ -175,7 +213,7 @@ const ViewServices = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto"
+            className="p-2 rounded bg-gray-700 hover:bg-gray-600 transition w-full sm:w-auto text-white"
           >
             <option value="latest">Latest</option>
             <option value="priceAsc">Price: Low → High</option>
@@ -193,11 +231,11 @@ const ViewServices = () => {
         {/* Services List */}
         {loading ? (
           <p className="text-center text-lg">Loading services...</p>
-        ) : services.length === 0 ? (
+        ) : filteredServices.length === 0 ? (
           <p className="text-center text-lg">No services found</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
+            {filteredServices.map((service) => (
               <div
                 key={service._id}
                 className="bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden flex flex-col"

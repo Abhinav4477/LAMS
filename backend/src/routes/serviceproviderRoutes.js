@@ -6,7 +6,12 @@ import {
   getServiceById, 
   updateServiceById, 
   getServiceProviderProfile, 
-  updateServiceProviderProfile 
+  updateServiceProviderProfile ,
+  getServiceProviderRequests,
+  updateRequestStatus,
+  getAcceptedRequests,
+  updateRequestStatus1,
+  getProviderRequests
 } from "../controllers/serviceproviderController.js";
 import { authenticateUser } from "../middleware/auth.js";
 import upload from "../middleware/upload.js"; // Multer upload utility
@@ -33,5 +38,21 @@ router.get("/account/me", authenticateUser, getServiceProviderProfile);
 
 // Update service provider profile
 router.put("/account/me", authenticateUser, updateServiceProviderProfile);
+
+//Route to get all the requests of the service provider
+
+router.get("/requests",authenticateUser,getServiceProviderRequests);
+
+// ✅ Update request status (Accept or Reject)
+router.put("/requests/:id", authenticateUser, updateRequestStatus);
+
+//Function to get acceptedd Requests
+router.get("/requests/accepted", authenticateUser, getAcceptedRequests);
+
+// Update request status (Accepted / Working / Completed / Rejected)
+router.put("/request/:id", authenticateUser, updateRequestStatus1);
+
+router.get("/requests/all", authenticateUser, getProviderRequests);
+
 
 export default router;

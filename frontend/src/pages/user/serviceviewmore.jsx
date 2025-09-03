@@ -11,17 +11,16 @@ const ServiceView = () => {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
-  const [alreadyRequested, setAlreadyRequested] = useState(false);
+  const [activeRequestExists, setActiveRequestExists] = useState(false); // renamed
 
   // Fetch service details
   useEffect(() => {
     const fetchService = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `http://localhost:5001/api/user/service/${id}`,
-          { withCredentials: true }
-        );
+        const res = await axios.get(`http://localhost:5001/api/user/service/${id}`, {
+          withCredentials: true,
+        });
         setService(res.data);
       } catch (err) {
         console.error("Get service by ID error:", err);
@@ -33,7 +32,7 @@ const ServiceView = () => {
     fetchService();
   }, [id]);
 
-  // Check if user already requested this service
+  // Check if an active request exists
   useEffect(() => {
     const checkRequest = async () => {
       try {
@@ -41,7 +40,7 @@ const ServiceView = () => {
           `http://localhost:5001/api/user/service-request/check/${id}`,
           { withCredentials: true }
         );
-        setAlreadyRequested(res.data.requestExists);
+        setActiveRequestExists(res.data.requestExists); // only active requests
       } catch (err) {
         console.error(err);
       }
@@ -67,7 +66,7 @@ const ServiceView = () => {
         { withCredentials: true }
       );
       toast.success(res.data.message || "Service request sent successfully!");
-      setAlreadyRequested(true); // disable button after request
+      setActiveRequestExists(true); // disable button only if active request now exists
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to send service request");
@@ -106,7 +105,6 @@ const ServiceView = () => {
       <Toaster />
       <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto">
         <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
-
           {/* Go Back Button */}
           <button
             onClick={() => navigate(-1)}
@@ -157,12 +155,12 @@ const ServiceView = () => {
             {/* Request Service Button */}
             <button
               onClick={handleRequestService}
-              disabled={requesting || alreadyRequested}
+              disabled={requesting || activeRequestExists}
               className={`mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 transition rounded text-white font-semibold ${
-                requesting || alreadyRequested ? "opacity-50 cursor-not-allowed" : ""
+                requesting || activeRequestExists ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {alreadyRequested
+              {activeRequestExists
                 ? "Request Already Sent"
                 : requesting
                 ? "Requesting..."

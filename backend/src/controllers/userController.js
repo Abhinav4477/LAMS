@@ -119,7 +119,12 @@ export const checkServiceRequest = async (req, res) => {
     const userId = req.user.id;
     const { id: serviceId } = req.params;
 
-    const requestExists = await ServiceRequest.exists({ userId, serviceId });
+    // Only check for requests that are still active
+    const requestExists = await ServiceRequest.exists({
+      userId,
+      serviceId,
+      status: { $in: ["Pending", "Accepted", "Working"] }, // exclude completed/canceled
+    });
 
     res.status(200).json({ requestExists: !!requestExists });
   } catch (err) {

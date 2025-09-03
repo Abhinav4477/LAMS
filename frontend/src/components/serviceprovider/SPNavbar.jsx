@@ -21,7 +21,7 @@ function Navbar({ className }) {
         setIsAuthenticated(true);
       } catch (err) {
         setIsAuthenticated(false);
-        navigate("/login", { replace: true }); // redirect if not logged in
+        navigate("/login", { replace: true });
       }
     };
     checkAuth();
@@ -34,20 +34,20 @@ function Navbar({ className }) {
         {},
         { withCredentials: true }
       );
-
       setIsAuthenticated(false);
       setActive(null);
       toast.success("Logged out successfully");
-
-      navigate("/login", { replace: true }); // redirect with replace to clear history
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Failed to logout");
     }
   };
 
-  // Hide menu if user is not authenticated
   if (!isAuthenticated) return null;
+
+  // Helper for navigation on ProductItem click
+  const handleNavigate = (path) => () => navigate(path);
 
   return (
     <div
@@ -57,7 +57,7 @@ function Navbar({ className }) {
       )}
     >
       <div className="bg-gray-900/90 backdrop-blur-md rounded-full flex items-center justify-between px-6 py-2 shadow-lg">
-        {/* Logo + LAMS text */}
+        {/* Logo */}
         <Link
           to="/serviceprovider/serviceproviderhomepage"
           className="flex items-center space-x-2 flex-shrink-0"
@@ -91,33 +91,40 @@ function Navbar({ className }) {
               </div>
             </MenuItem>
 
-            {/* Products Menu */}
-            <MenuItem setActive={setActive} active={active} item="Products">
-              <div className="text-sm grid grid-cols-2 gap-10 p-4">
-                <ProductItem
-                  title="Algochurn"
-                  href="https://algochurn.com"
-                  src="https://assets.aceternity.com/demos/algochurn.webp"
-                  description="Prepare for tech interviews like never before."
-                />
-                <ProductItem
-                  title="Tailwind Master Kit"
-                  href="https://tailwindmasterkit.com"
-                  src="https://assets.aceternity.com/demos/tailwindmasterkit.webp"
-                  description="Production ready Tailwind CSS components for your next project"
-                />
-                <ProductItem
-                  title="Moonbeam"
-                  href="https://gomoonbeam.com"
-                  src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
-                  description="Never write from scratch again. Go from idea to blog in minutes."
-                />
-                <ProductItem
-                  title="Rogue"
-                  href="https://userogue.com"
-                  src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.47.07%E2%80%AFPM.png"
-                  description="Respond to government RFPs, RFIs and RFQs 10x faster using AI"
-                />
+            {/* Work Menu */}
+            <MenuItem setActive={setActive} active={active} item="Work">
+              <div className="text-sm grid grid-cols-2 gap-6 p-4">
+                <div onClick={handleNavigate("/serviceprovider/viewrequests")}>
+                  <ProductItem
+                    title="New Work"
+                    src="https://assets.aceternity.com/demos/algochurn.webp"
+                    description="Prepare for tech interviews like never before."
+                  />
+                </div>
+
+                <div onClick={handleNavigate("/serviceprovider/manage")}>
+                  <ProductItem
+                    title="Manage Work"
+                    src="https://assets.aceternity.com/demos/tailwindmasterkit.webp"
+                    description="Production ready Tailwind CSS components for your next project"
+                  />
+                </div>
+
+                <div onClick={handleNavigate("/serviceprovider/transactions")}>
+                  <ProductItem
+                    title="Transactions"
+                    src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
+                    description="Never write from scratch again. Go from idea to blog in minutes."
+                  />
+                </div>
+
+                <div onClick={handleNavigate("/serviceprovider/report")}>
+                  <ProductItem
+                    title="Report"
+                    src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.47.07%E2%80%AFPM.png"
+                    description="Respond to government RFPs, RFIs and RFQs 10x faster using AI"
+                  />
+                </div>
               </div>
             </MenuItem>
 
