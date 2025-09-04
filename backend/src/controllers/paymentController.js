@@ -52,33 +52,29 @@ export const makePayment = async (req, res) => {
 };
 
 // Get payment history
+
 export const getPaymentHistory = async (req, res) => {
   try {
-    const payments = await Payment.find()
-      .populate("userId", "username email")    // customer info
-      .populate("serviceId", "name price");    // service info
+    // Fetch payments for this user
+    const payments = await Payment.find({ userId: req.user.id })
+      .populate("serviceId", "name")       // service name
+      .populate("providerId", "username")  // provider name directly from User
+      .sort({ paymentDate: -1 });
 
-    // Fetch provider info for each payment
-    const formattedPayments = await Promise.all(
-      payments.map(async (p) => {
-        const providerUser = await User.findById(p.providerId);
-        return {
-          _id: p._id,
-          receiptId: p.receiptId,
-          transactionId: p.transactionId,
-          service: p.serviceId?.name || "N/A",
-          amount: p.amount,
-          user: p.userId?.username || "N/A",
-          provider: providerUser?.username || "N/A",
-          date: p.paymentDate,
-          status: p.status,
-        };
-      })
-    );
+    const history = payments.map((p) => ({
+      _id: p._id,
+      receiptId: p.receiptId,
+      transactionId: p.transactionId,
+      service: p.serviceId?.name || "N/A",
+      provider: p.providerId?.username || "N/A", // provider name works now
+      amount: p.amount,
+      status: p.status,
+      date: p.paymentDate ? new Date(p.paymentDate).toLocaleString() : "N/A",
+    }));
 
-    res.status(200).json(formattedPayments);
+    res.status(200).json(history);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching payment history:", err);
     res.status(500).json({ message: "Failed to fetch payment history" });
   }
 };

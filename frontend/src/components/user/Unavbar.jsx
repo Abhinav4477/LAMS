@@ -18,7 +18,7 @@ const NavbarDemo = () => {
   const navItems = [
     { name: "Services", link: "/user/viewservices" },
     { name: "My Requests", link: "/user/viewrequests" },
-    { name: "Contact", link: "/#contact" },
+    { name: "History", link: "/user/history" },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

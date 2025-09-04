@@ -29,6 +29,7 @@ import ServiceView from './pages/user/serviceviewmore.jsx'
 import ViewRequests from './pages/user/viewrequests.jsx'
 import AcceptedRequests from './pages/serviceprovider/acceptedrequests.jsx'
 import ViewURequests from './pages/serviceprovider/viewrequests.jsx'
+import TransactionHistory from './pages/user/history.jsx'
 
 import { Toaster } from 'react-hot-toast'
 
@@ -66,6 +67,7 @@ const App = () => {
       <Route path='/user/viewrequests' element={<ViewRequests/>} />
       <Route path='/serviceprovider/viewrequests' element={<ViewURequests/>} />
       <Route path='/serviceprovider/manage' element={<AcceptedRequests/>} />
+      <Route path='/user/history' element={<TransactionHistory/>} />
 
       
 
