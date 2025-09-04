@@ -27,6 +27,14 @@ const ViewServices = () => {
 
   const axiosConfig = { withCredentials: true };
 
+  useEffect(() => {
+  // Prevent browser from caching the page
+  window.history.replaceState(null, "", window.location.href);
+  window.onpopstate = () => {
+    window.location.replace("/login"); // force redirect if back is clicked
+  };
+}, []);
+
   // Fetch dropdowns
   useEffect(() => {
     const fetchDropdowns = async () => {

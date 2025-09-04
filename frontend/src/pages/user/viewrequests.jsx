@@ -11,6 +11,13 @@ const ViewRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
+   useEffect(() => {
+  // Prevent browser from caching the page
+  window.history.replaceState(null, "", window.location.href);
+  window.onpopstate = () => {
+    window.location.replace("/login"); // force redirect if back is clicked
+  };
+}, []);
   useEffect(() => {
     const fetchRequests = async () => {
       try {

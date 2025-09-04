@@ -5,6 +5,8 @@ import toast, { Toaster } from "react-hot-toast";
 import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
 
+
+
 // Star rating component
 const StarRating = ({ rating, setRating }) => (
   <div className="flex space-x-1">
@@ -40,6 +42,13 @@ const ServiceView = () => {
   const [newReview, setNewReview] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
+    useEffect(() => {
+  // Prevent browser from caching the page
+  window.history.replaceState(null, "", window.location.href);
+  window.onpopstate = () => {
+    window.location.replace("/login"); // force redirect if back is clicked
+  };
+}, []);
   // Fetch service
   const fetchService = async () => {
     try {

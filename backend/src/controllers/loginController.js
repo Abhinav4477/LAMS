@@ -99,19 +99,27 @@ export const createAccount = async (req, res) => {
 };
 
 // -------------------- LOGOUT --------------------
-export const logout = async (req, res) => {
+// controllers/authController.js
+
+export const logout = (req, res) => {
   try {
-    res.clearCookie('token', {
+    // Clear the cookie with the same options used when setting it
+    res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      path: "/", // must match the path when cookie was set
     });
+
+    // Respond with success message
     res.status(200).json({ message: "Logout successful" });
-  } catch (error) {
-    console.error("Logout error:", error);
+  } catch (err) {
+    console.error("Logout error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
 
 // -------------------- CREATE SERVICE PROVIDER --------------------
 export const createServiceProvider = async (req, res) => {
@@ -180,5 +188,28 @@ export const createServiceProvider = async (req, res) => {
   } catch (error) {
     console.error("Error in createServiceProvider:", error);
     res.status(500).json({ error: 'Internal server error: ' + error.message });
+  }
+};
+
+
+export const useCheckLogin = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    req.user = user; // attach user to request
+    next(); // continue to next middleware or route
+  } catch (err) {
+    console.error("useCheckLogin error:", err);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
