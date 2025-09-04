@@ -4,6 +4,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import serviceproviderRoutes from "./routes/serviceproviderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js"
+import reviewRoutes from "./routes/reviewRoutes.js"
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -32,6 +33,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/provider", serviceproviderRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/payment",paymentRoutes);
+app.use("/api/review",reviewRoutes);
 
 // Connect DB and start server
 connectDB().then(() => {
