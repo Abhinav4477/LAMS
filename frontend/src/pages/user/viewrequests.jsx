@@ -30,19 +30,57 @@ const ViewRequests = () => {
     fetchRequests();
   }, []);
 
-  const handlePayment = (reqId) => {
-    console.log("Pay for request:", reqId);
-    toast.success("Payment functionality triggered!");
+  const handlePayment = async (req) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:5001/api/payment/pay/${req._id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      const receipt = res.data.receipt;
+      toast.success(`Payment Successful! Receipt ID: ${receipt.receiptId}`);
+
+      // Open printable receipt
+      const receiptWindow = window.open("", "_blank");
+      receiptWindow.document.write(`
+        <html>
+          <head>
+            <title>Receipt</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { padding: 10px; border: 1px solid #333; text-align: left; }
+            </style>
+          </head>
+          <body>
+            <h1>Payment Receipt</h1>
+            <p><strong>Receipt ID:</strong> ${receipt.receiptId}</p>
+            <p><strong>Transaction ID:</strong> ${receipt.transactionId}</p>
+            <p><strong>Service:</strong> ${receipt.service}</p>
+            <p><strong>Provider:</strong> ${receipt.provider}</p>
+            <p><strong>Amount:</strong> ₹${receipt.amount}</p>
+            <p><strong>Date:</strong> ${new Date(receipt.date).toLocaleString()}</p>
+          </body>
+        </html>
+      `);
+      receiptWindow.print();
+
+      // Remove from state
+      setRequests((prev) => prev.filter((r) => r._id !== req._id));
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Payment failed");
+    }
   };
 
   const getProgressPercent = (status) => {
     if (status === "Rejected" || status === "Cancelled") {
-      const index = STATUS_STEPS.indexOf("Accepted");
-      return ((index + 1) / STATUS_STEPS.length) * 100;
+      return ((STATUS_STEPS.indexOf("Accepted") + 1) / STATUS_STEPS.length) * 100;
     }
-    const index = STATUS_STEPS.indexOf(status);
-    if (index === -1) return 0;
-    return ((index + 1) / STATUS_STEPS.length) * 100;
+    const idx = STATUS_STEPS.indexOf(status);
+    return idx === -1 ? 0 : ((idx + 1) / STATUS_STEPS.length) * 100;
   };
 
   if (loading) {
@@ -62,7 +100,7 @@ const ViewRequests = () => {
       <div className="bg-gray-900 text-white min-h-screen flex flex-col">
         <NavbarDemo />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-lg">You have no service requests yet.</p>
+          <p className="text-lg">You have no pending service requests.</p>
         </main>
         <Footer />
       </div>
@@ -109,9 +147,7 @@ const ViewRequests = () => {
                       {req.createdAt ? new Date(req.createdAt).toLocaleString() : "N/A"}
                     </p>
 
-                    {/* Modern Timeline Progress Bar */}
                     <div className="mt-4 relative w-full h-6">
-                      {/* Progress bar background */}
                       <div className="absolute top-2.5 left-0 w-full h-2 bg-gray-700 rounded-full overflow-hidden">
                         <motion.div
                           className={`h-2 rounded-full ${
@@ -128,7 +164,6 @@ const ViewRequests = () => {
                         />
                       </div>
 
-                      {/* Step markers */}
                       <div className="absolute top-0 left-0 w-full flex justify-between px-1">
                         {STATUS_STEPS.map((step, idx) => {
                           const isCompleted =
@@ -152,25 +187,13 @@ const ViewRequests = () => {
                         })}
                       </div>
                     </div>
-
-                    {/* Rejection or Cancellation message */}
-                    {(req.status === "Rejected" || req.status === "Cancelled") && (
-                      <p
-                        className={`mt-2 font-semibold text-sm ${
-                          req.status === "Rejected" ? "text-red-400" : "text-gray-400"
-                        }`}
-                      >
-                        {req.status === "Rejected" ? "Request Rejected" : "Request Cancelled"}
-                      </p>
-                    )}
                   </div>
                 </div>
 
-                {/* Payment button if completed */}
                 {req.status === "Completed" && (
                   <button
-                    onClick={() => handlePayment(req._id)}
-                    className="mt-4 md:mt-3 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition transform hover:scale-105"
+                    className="mt-4 md:mt-3 px-4 py-2 rounded-lg font-semibold bg-green-600 text-white hover:bg-green-700 transition transform hover:scale-105"
+                    onClick={() => handlePayment(req)}
                   >
                     Pay Now
                   </button>

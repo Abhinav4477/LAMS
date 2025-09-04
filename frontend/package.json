@@ -16,6 +16,7 @@
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
     "daisyui": "^5.0.46",
+    "jwt-decode": "^4.0.0",
     "motion": "^12.23.12",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -25,7 +26,8 @@
     "simplex-noise": "^4.0.3",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
-    "tw-elements-react": "^1.0.0-alpha-end"
+    "tw-elements-react": "^1.0.0-alpha-end",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

@@ -2,6 +2,7 @@
 import Service from "../models/Service.js";
 import ServiceRequest from "../models/Servicerequest.js";
 import mongoose from "mongoose";
+import Payment from "../models/Payment.js"
 
 // Helper to convert string to ObjectId safely
 const toObjectId = (id) => {
@@ -185,7 +186,15 @@ export const getMyRequests = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const requests = await ServiceRequest.find({ userId })
+    // Step 1: Find all payments that are Paid
+    const paidPayments = await Payment.find({ userId, status: "Paid" }).select("requestId");
+    const paidRequestIds = paidPayments.map((p) => p.requestId);
+
+    // Step 2: Fetch ServiceRequests that are NOT in paidRequestIds
+    const requests = await ServiceRequest.find({
+      userId,
+      _id: { $nin: paidRequestIds }, // exclude paid requests
+    })
       .populate({
         path: "serviceId",
         select: "name price coverImage location",
