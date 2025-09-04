@@ -1,28 +1,32 @@
-import mongoose from "mongoose";
 import express from "express";
-import { getAllServices } from "../controllers/userController.js";
-import { getServiceById } from "../controllers/userController.js";
-import { createServiceRequest } from "../controllers/userController.js";
+import {
+  getAllServices,
+  getServiceById,
+  createServiceRequest,
+  checkServiceRequest,
+  getMyRequests,
+  cancelServiceRequest,
+} from "../controllers/userController.js";
 import { authenticateUser } from "../middleware/auth.js";
-import { checkServiceRequest } from "../controllers/userController.js";
-import { getMyRequests } from "../controllers/userController.js";
 
 const router = express.Router();
 
-// Public route to get all services with filtering and sorting
-router.get("/services",authenticateUser, getAllServices);
+// Get all services with filtering and sorting
+router.get("/services", authenticateUser, getAllServices);
 
-// Public route to get a single service by ID
-router.get("/service/:id",authenticateUser, getServiceById);
+// Get a single service by ID
+router.get("/service/:id", authenticateUser, getServiceById);
 
-// Protected route to create a service request
+// Create a service request
 router.post("/service-request", authenticateUser, createServiceRequest);
 
-//route to check requests already exists
-router.get("/check/:id", authenticateUser, checkServiceRequest);
+// Check if a service request already exists
+router.get("/service-request/check/:id", authenticateUser, checkServiceRequest);
 
-//route to get the requests of a user
+// Get all requests of the logged-in user
+router.get("/service-request/my-requests", authenticateUser, getMyRequests);
 
-router.get("/service-request/my-requests",authenticateUser,getMyRequests);
+// Cancel a service request
+router.patch("/service-request/:id/cancel", authenticateUser, cancelServiceRequest);
 
 export default router;

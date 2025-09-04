@@ -1,43 +1,38 @@
 // controllers/userController.js
 import Service from "../models/Service.js";
 import ServiceRequest from "../models/Servicerequest.js";
+import mongoose from "mongoose";
+
+// Helper to convert string to ObjectId safely
+const toObjectId = (id) => {
+  try {
+    return new mongoose.Types.ObjectId(id);
+  } catch {
+    return null;
+  }
+};
 
 // Get all services
 export const getAllServices = async (req, res) => {
   try {
-    const {
-      categoryId,
-      stateId,
-      districtId,
-      locationId,
-      minPrice,
-      maxPrice,
-      sortBy,
-    } = req.query;
-
+    const { categoryId, stateId, districtId, locationId, minPrice, maxPrice, sortBy } = req.query;
     const query = {};
 
-    // Category filter
     if (categoryId) query.category = categoryId;
-
-    // Location filters (cascading)
     if (locationId) query.location = locationId;
     else if (districtId) query["location.district"] = districtId;
     else if (stateId) query["location.district.state"] = stateId;
 
-    // Price filter
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
-    // Sorting
     let sort = { createdAt: -1 };
     if (sortBy === "priceAsc") sort = { price: 1 };
     if (sortBy === "priceDesc") sort = { price: -1 };
 
-    // Fetch services with populated references
     const services = await Service.find(query)
       .populate("category")
       .populate({
@@ -47,7 +42,7 @@ export const getAllServices = async (req, res) => {
           populate: { path: "state" },
         },
       })
-      .populate("provider", "name email") // <-- populate provider directly
+      .populate("provider", "username email")
       .sort(sort);
 
     res.json(services);
@@ -61,7 +56,7 @@ export const getAllServices = async (req, res) => {
 export const getServiceById = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id)
-      .populate("provider", "username email role") // <- only provider
+      .populate("provider", "username email")
       .populate("category", "name")
       .populate({
         path: "location",
@@ -72,7 +67,6 @@ export const getServiceById = async (req, res) => {
       });
 
     if (!service) return res.status(404).json({ message: "Service not found" });
-
     res.json(service);
   } catch (error) {
     console.error("Get service by ID error:", error);
@@ -90,25 +84,37 @@ export const createServiceRequest = async (req, res) => {
       return res.status(400).json({ message: "Service ID and Provider ID are required" });
     }
 
+    const serviceObjectId = toObjectId(serviceId);
+    if (!serviceObjectId) return res.status(400).json({ message: "Invalid Service ID" });
+
+    const activeStatuses = ["Pending", "Accepted", "Working"];
     const existingRequest = await ServiceRequest.findOne({
       userId,
-      serviceId,
-      status: "Pending",
+      serviceId: serviceObjectId,
+      status: { $in: activeStatuses },
     });
 
     if (existingRequest) {
-      return res.status(400).json({ message: "You already have a pending request for this service" });
+      return res.status(400).json({
+        message: `You already have an active request (Status: ${existingRequest.status})`,
+        activeRequest: existingRequest,
+      });
     }
 
     const newRequest = await ServiceRequest.create({
       userId,
-      serviceId,
+      serviceId: serviceObjectId,
       providerId,
+      status: "Pending",
     });
 
-    res.status(201).json({ message: "Service request created successfully", request: newRequest });
+    res.status(201).json({
+      message: "Service request created successfully",
+      request: newRequest,
+      activeRequest: newRequest,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Create request error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -119,37 +125,71 @@ export const checkServiceRequest = async (req, res) => {
     const userId = req.user.id;
     const { id: serviceId } = req.params;
 
-    // Only check for requests that are still active
-    const requestExists = await ServiceRequest.exists({
+    const serviceObjectId = toObjectId(serviceId);
+    if (!serviceObjectId) return res.status(400).json({ message: "Invalid Service ID" });
+
+    const activeStatuses = ["Pending", "Accepted", "Working"];
+    const activeRequest = await ServiceRequest.findOne({
       userId,
-      serviceId,
-      status: { $in: ["Pending", "Accepted", "Working"] }, // exclude completed/canceled
+      serviceId: serviceObjectId,
+      status: { $in: activeStatuses },
     });
 
-    res.status(200).json({ requestExists: !!requestExists });
+    if (activeRequest) {
+      return res.status(200).json({
+        canRequest: false,
+        message: `You already have an active request (Status: ${activeRequest.status}).`,
+        activeRequest,
+      });
+    }
+
+    return res.status(200).json({
+      canRequest: true,
+      message: "You can request this service.",
+      activeRequest: null,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to check service request" });
+    console.error("Check request error:", err);
+    res.status(500).json({ message: "Server error while checking request" });
   }
 };
 
-//Function to get requests of a user
+// Cancel service request
+export const cancelServiceRequest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id: requestId } = req.params;
+
+    const requestObjectId = toObjectId(requestId);
+    if (!requestObjectId) return res.status(400).json({ message: "Invalid Request ID" });
+
+    const request = await ServiceRequest.findOne({ _id: requestObjectId, userId });
+    if (!request) return res.status(404).json({ message: "Request not found." });
+    if (request.status !== "Pending") return res.status(400).json({ message: "Only pending requests can be cancelled." });
+
+    request.status = "Cancelled";
+    await request.save();
+
+    res.status(200).json({
+      message: "Service request has been cancelled successfully.",
+      request,
+    });
+  } catch (err) {
+    console.error("Cancel request error:", err);
+    res.status(500).json({ message: "Server error while cancelling request." });
+  }
+};
+
+// Get all requests of the logged-in user
 export const getMyRequests = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const userId = req.user.id; // <- use `id`, not `_id`
+    const userId = req.user.id;
 
     const requests = await ServiceRequest.find({ userId })
       .populate({
         path: "serviceId",
         select: "name price coverImage location",
-        populate: {
-          path: "location",
-          select: "name", // only name
-        },
+        populate: { path: "location", select: "name" },
       })
       .populate({
         path: "providerId",

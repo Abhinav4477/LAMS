@@ -11,7 +11,9 @@ const ServiceView = () => {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
-  const [activeRequestExists, setActiveRequestExists] = useState(false); // renamed
+  const [canRequest, setCanRequest] = useState(null);
+  const [checkMessage, setCheckMessage] = useState("");
+  const [activeRequest, setActiveRequest] = useState(null);
 
   // Fetch service details
   useEffect(() => {
@@ -32,44 +34,69 @@ const ServiceView = () => {
     fetchService();
   }, [id]);
 
-  // Check if an active request exists
+  // Check active request
+  const checkRequest = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5001/api/user/service-request/check/${id}`, {
+        withCredentials: true,
+      });
+      setCanRequest(res.data.canRequest);
+      setCheckMessage(res.data.message || "");
+      setActiveRequest(res.data.activeRequest || null);
+    } catch (err) {
+      console.error("Check request error:", err);
+      setCanRequest(true); // assume user can request if error
+      setActiveRequest(null);
+      setCheckMessage("");
+    }
+  };
+
   useEffect(() => {
-    const checkRequest = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5001/api/user/service-request/check/${id}`,
-          { withCredentials: true }
-        );
-        setActiveRequestExists(res.data.requestExists); // only active requests
-      } catch (err) {
-        console.error(err);
-      }
-    };
     checkRequest();
   }, [id]);
 
-  // Handle service request
+  // Handle request
   const handleRequestService = async () => {
+    if (!canRequest) {
+      toast.error("You already have an active request for this service!");
+      return;
+    }
     if (!service?.provider?._id) {
       toast.error("Service provider not found");
       return;
     }
-
     try {
       setRequesting(true);
       const res = await axios.post(
         "http://localhost:5001/api/user/service-request",
-        {
-          serviceId: service._id,
-          providerId: service.provider._id,
-        },
+        { serviceId: service._id, providerId: service.provider._id },
         { withCredentials: true }
       );
       toast.success(res.data.message || "Service request sent successfully!");
-      setActiveRequestExists(true); // disable button only if active request now exists
+      await checkRequest();
     } catch (err) {
-      console.error(err);
+      console.error("Send request error:", err);
       toast.error(err.response?.data?.message || "Failed to send service request");
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  // Handle cancel
+  const handleCancelRequest = async () => {
+    if (!activeRequest?._id) return;
+    try {
+      setRequesting(true);
+      const res = await axios.patch(
+        `http://localhost:5001/api/user/service-request/${activeRequest._id}/cancel`,
+        {},
+        { withCredentials: true }
+      );
+      toast.success(res.data.message || "Request cancelled successfully!");
+      await checkRequest();
+    } catch (err) {
+      console.error("Cancel request error:", err);
+      toast.error(err.response?.data?.message || "Failed to cancel request");
     } finally {
       setRequesting(false);
     }
@@ -99,13 +126,63 @@ const ServiceView = () => {
     );
   }
 
+  // Determine button
+  let buttonElement;
+  const status = activeRequest?.status?.toLowerCase();
+
+  if (canRequest) {
+    buttonElement = (
+      <button
+        onClick={handleRequestService}
+        disabled={requesting}
+        className={`mt-4 px-6 py-3 rounded text-white font-semibold transition ${
+          requesting ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+        }`}
+      >
+        {requesting ? "Requesting..." : "Request Service"}
+      </button>
+    );
+  } else if (status === "pending") {
+    buttonElement = (
+      <button
+        onClick={handleCancelRequest}
+        disabled={requesting}
+        className={`mt-4 px-6 py-3 rounded text-white font-semibold transition ${
+          requesting ? "bg-gray-600 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+        }`}
+      >
+        {requesting ? "Processing..." : "Cancel Pending Request"}
+      </button>
+    );
+  } else if (["accepted", "working"].includes(status)) {
+    buttonElement = (
+      <button
+        disabled
+        className="mt-4 px-6 py-3 bg-gray-600 rounded text-white font-semibold cursor-not-allowed"
+      >
+        Request Already Active ({activeRequest.status})
+      </button>
+    );
+  } else {
+    buttonElement = (
+      <button
+        onClick={handleRequestService}
+        disabled={requesting}
+        className={`mt-4 px-6 py-3 rounded text-white font-semibold transition ${
+          requesting ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+        }`}
+      >
+        {requesting ? "Requesting..." : "Request Service"}
+      </button>
+    );
+  }
+
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-screen">
       <NavbarDemo />
       <Toaster />
       <main className="flex-1 p-4 md:p-6 max-w-5xl mx-auto">
         <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
-          {/* Go Back Button */}
           <button
             onClick={() => navigate(-1)}
             className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded z-10"
@@ -113,7 +190,6 @@ const ServiceView = () => {
             &larr; Go Back
           </button>
 
-          {/* Service Cover Image */}
           {service.coverImage && (
             <img
               src={`http://localhost:5001/${service.coverImage}`}
@@ -122,7 +198,6 @@ const ServiceView = () => {
             />
           )}
 
-          {/* Service Details */}
           <div className="p-6 flex flex-col flex-1">
             <h1 className="text-3xl font-bold mb-4">{service.name}</h1>
             <p className="text-green-400 font-bold text-xl mb-2">₹{service.price}</p>
@@ -132,9 +207,7 @@ const ServiceView = () => {
             </p>
 
             <h2 className="text-xl font-semibold mb-2">Description</h2>
-            <p className="text-gray-300 mb-4">
-              {service.description || "No description available."}
-            </p>
+            <p className="text-gray-300 mb-4">{service.description || "No description available."}</p>
 
             {service.additionalInfo && (
               <>
@@ -143,7 +216,6 @@ const ServiceView = () => {
               </>
             )}
 
-            {/* Service Provider Details */}
             {service.provider && (
               <div className="mt-4 p-4 bg-gray-700 rounded">
                 <h2 className="text-xl font-semibold mb-2">Service Provider</h2>
@@ -152,20 +224,9 @@ const ServiceView = () => {
               </div>
             )}
 
-            {/* Request Service Button */}
-            <button
-              onClick={handleRequestService}
-              disabled={requesting || activeRequestExists}
-              className={`mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 transition rounded text-white font-semibold ${
-                requesting || activeRequestExists ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {activeRequestExists
-                ? "Request Already Sent"
-                : requesting
-                ? "Requesting..."
-                : "Request Service"}
-            </button>
+            {buttonElement}
+
+            {checkMessage && <p className="text-gray-400 text-sm mt-2">{checkMessage}</p>}
           </div>
         </div>
       </main>
