@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -96,7 +95,6 @@ const SPTransactionHistory = () => {
   if (loading) {
     return (
       <div className="bg-gray-900 text-white min-h-screen flex flex-col">
-        <SPNavbar />
         <main className="flex-1 flex items-center justify-center mt-20">
           <p className="text-lg animate-pulse">Loading your transactions...</p>
         </main>
@@ -108,7 +106,6 @@ const SPTransactionHistory = () => {
   if (!transactions.length) {
     return (
       <div className="bg-gray-900 text-white min-h-screen flex flex-col">
-        <SPNavbar />
         <main className="flex-1 flex items-center justify-center mt-20">
           <p className="text-lg">No transactions found.</p>
         </main>
@@ -118,9 +115,17 @@ const SPTransactionHistory = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col">
-      <SPNavbar />
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col relative">
       <Toaster />
+
+      {/* GO BACK BUTTON */}
+      <button
+        onClick={() => navigate("/serviceprovider/serviceproviderHomepage")}
+        className="fixed top-4 left-4 z-50 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition-colors duration-200"
+      >
+        ← Go Back
+      </button>
+
       <main className="flex-1 p-4 md:p-15 max-w-6xl mx-auto mt-20">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <h1 className="text-3xl md:text-4xl font-bold text-center md:text-left">

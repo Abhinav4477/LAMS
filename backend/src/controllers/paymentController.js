@@ -1,6 +1,7 @@
 import Payment from "../models/Payment.js";
 import ServiceRequest from "../models/ServiceRequest.js";
 import User from "../models/Users.js"; // import User model
+import Service from "../models/Service.js"
 import ServiceProvider from "../models/Serviceprovider.js"
 import { v4 as uuidv4 } from "uuid";
 
@@ -106,6 +107,53 @@ export const getProviderTransactionHistory = async (req, res) => {
     res.json(formatted);
   } catch (err) {
     console.error("Error fetching provider transactions:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+//Function to fetch reports
+
+export const getProviderReport = async (req, res) => {
+  try {
+    const providerUserId = req.user.id;
+
+    // Fetch all service requests for this provider
+    const requests = await ServiceRequest.find({ providerId: providerUserId })
+      .populate("serviceId", "name price")
+      .sort({ createdAt: -1 });
+
+    // Fetch all payments for this provider
+    const payments = await Payment.find({ providerId: providerUserId })
+      .populate("serviceId", "name");
+
+    // Requests per service (count)
+    const requestCountMap = {};
+    requests.forEach(r => {
+      const serviceName = r.serviceId?.name || "Unknown";
+      requestCountMap[serviceName] = (requestCountMap[serviceName] || 0) + 1;
+    });
+    const requestData = Object.entries(requestCountMap).map(([serviceName, count]) => ({ serviceName, count }));
+
+    // Requests by status
+    const statusCountMap = {};
+    requests.forEach(r => {
+      const status = r.status || "Unknown";
+      statusCountMap[status] = (statusCountMap[status] || 0) + 1;
+    });
+    const statusData = Object.entries(statusCountMap).map(([status, count]) => ({ _id: status, count }));
+
+    // Revenue per service
+    const revenueMap = {};
+    payments.forEach(p => {
+      const serviceName = p.serviceId?.name || "Unknown";
+      revenueMap[serviceName] = (revenueMap[serviceName] || 0) + p.amount;
+    });
+    const revenueData = Object.entries(revenueMap).map(([serviceName, totalAmount]) => ({ serviceName, totalAmount }));
+
+    res.json({ requestData, statusData, revenueData });
+  } catch (err) {
+    console.error("Error fetching provider report:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

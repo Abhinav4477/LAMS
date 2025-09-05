@@ -32,6 +32,7 @@ import ViewURequests from './pages/serviceprovider/viewrequests.jsx'
 import TransactionHistory from './pages/user/history.jsx'
 import Account from './pages/user/account.jsx'
 import Transaction from "./pages/serviceprovider/transactions.jsx"
+import Report from "./pages/serviceprovider/report.jsx"
 
 import { Toaster } from 'react-hot-toast'
 
@@ -72,6 +73,7 @@ const App = () => {
       <Route path='/user/history' element={<TransactionHistory/>} />
       <Route path='/user/account' element={<Account/>}  />
       <Route path='/serviceprovider/transaction' element={<Transaction />}  />
+      <Route path='/serviceprovider/report' element={<Report/>}  />
       
 
 
