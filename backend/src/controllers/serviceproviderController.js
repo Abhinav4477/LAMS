@@ -2,10 +2,24 @@ import Service from "../models/Service.js";
 import Category from "../models/Category.js";
 import Location from "../models/Location.js";
 import User from "../models/Users.js";
+import ServiceRequest from "../models/Servicerequest.js";
+import ServiceProvider from "../models/ServiceProvider.js";
 import path from "path";
 import fs from "fs";
-import ServiceProvider from "../models/ServiceProvider.js";
-import mongoose from "mongoose";
+import nodemailer from "nodemailer";
+
+// Nodemailer transporter for sending emails
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
+    port: Number(process.env.SMTP_PORT), // 587
+    secure: false,                       // true for 465, false for 587
+    auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+    },
+});
+
+// -------------------- Service CRUD --------------------
 
 // Create a new service with optional cover image
 export const createService = async (req, res) => {
@@ -30,7 +44,7 @@ export const createService = async (req, res) => {
       category: category._id,
       location: location._id,
       provider: userId,
-      coverImage: req.file ? req.file.path : "", // store uploaded image path
+      coverImage: req.file ? req.file.path : "",
     });
 
     const savedService = await service.save();
@@ -41,7 +55,7 @@ export const createService = async (req, res) => {
   }
 };
 
-// Get all services by provider (returns coverImage path)
+// Get all services by provider
 export const getServicesByProvider = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -49,6 +63,7 @@ export const getServicesByProvider = async (req, res) => {
       .populate("category", "name")
       .populate("location", "name")
       .exec();
+
     res.status(200).json(services);
   } catch (err) {
     console.error("Get services by provider error:", err);
@@ -56,49 +71,17 @@ export const getServicesByProvider = async (req, res) => {
   }
 };
 
-// Delete a service by ID
-export const deleteService = async (req, res) => {
-  try {
-    const serviceId = req.params.id;
-    const userId = req.user?.id;
-
-    // Find the service first (so we know the cover image path)
-    const service = await Service.findOne({ _id: serviceId, provider: userId });
-    if (!service) {
-      return res.status(404).json({ error: "Service not found or unauthorized" });
-    }
-
-    // Delete the cover image from disk if it exists
-    if (service.coverImage) {
-      fs.unlink(service.coverImage, (err) => {
-        if (err) console.error("Failed to delete cover image:", err);
-      });
-    }
-
-    // Delete the service document from DB
-    await Service.findByIdAndDelete(serviceId);
-
-    res.status(200).json({ message: "Service and cover image deleted" });
-  } catch (err) {
-    console.error("Delete service error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// Get service by ID (returns coverImage path)
+// Get service by ID
 export const getServiceById = async (req, res) => {
   try {
     const serviceId = req.params.id;
-
     const service = await Service.findById(serviceId)
       .populate("category", "name")
       .populate("location", "name")
       .populate("provider", "name email")
       .exec();
 
-    if (!service) {
-      return res.status(404).json({ error: "Service not found" });
-    }
+    if (!service) return res.status(404).json({ error: "Service not found" });
 
     res.status(200).json(service);
   } catch (err) {
@@ -107,7 +90,7 @@ export const getServiceById = async (req, res) => {
   }
 };
 
-// Update a service by ID with optional cover image
+// Update a service by ID
 export const updateServiceById = async (req, res) => {
   try {
     const serviceId = req.params.id;
@@ -125,11 +108,8 @@ export const updateServiceById = async (req, res) => {
     if (!location) return res.status(400).json({ error: "Invalid location" });
 
     const service = await Service.findOne({ _id: serviceId, provider: userId });
-    if (!service) {
-      return res.status(404).json({ error: "Service not found or unauthorized" });
-    }
+    if (!service) return res.status(404).json({ error: "Service not found or unauthorized" });
 
-    // Prepare updated data
     const updatedData = {
       name,
       description,
@@ -138,25 +118,16 @@ export const updateServiceById = async (req, res) => {
       location: location._id.toString(),
     };
 
-    // Handle new cover image
     if (req.file) {
-      // Delete old image safely
       if (service.coverImage) {
-        const oldPath = path.join(process.cwd(), service.coverImage);
-        fs.access(oldPath, fs.constants.F_OK, (err) => {
-          if (!err) {
-            fs.unlink(oldPath, (err) => {
-              if (err) console.error("Failed to delete old image:", err);
-            });
-          }
+        fs.unlink(service.coverImage, (err) => {
+          if (err) console.error("Failed to delete old image:", err);
         });
       }
       updatedData.coverImage = req.file.path;
     }
 
-    // Update service
     const updatedService = await Service.findByIdAndUpdate(serviceId, updatedData, { new: true });
-
     res.status(200).json({ message: "Service updated", service: updatedService });
   } catch (err) {
     console.error("Update service error:", err);
@@ -164,11 +135,35 @@ export const updateServiceById = async (req, res) => {
   }
 };
 
+// Delete a service by ID
+export const deleteService = async (req, res) => {
+  try {
+    const serviceId = req.params.id;
+    const userId = req.user?.id;
+
+    const service = await Service.findOne({ _id: serviceId, provider: userId });
+    if (!service) return res.status(404).json({ error: "Service not found or unauthorized" });
+
+    if (service.coverImage) {
+      fs.unlink(service.coverImage, (err) => {
+        if (err) console.error("Failed to delete cover image:", err);
+      });
+    }
+
+    await Service.findByIdAndDelete(serviceId);
+    res.status(200).json({ message: "Service and cover image deleted" });
+  } catch (err) {
+    console.error("Delete service error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// -------------------- Service Provider Profile --------------------
+
 // Get service provider profile
 export const getServiceProviderProfile = async (req, res) => {
   try {
     const userId = req.user?.id;
-
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const serviceProvider = await ServiceProvider.findOne({ user: userId })
@@ -178,9 +173,7 @@ export const getServiceProviderProfile = async (req, res) => {
     if (!serviceProvider) return res.status(404).json({ error: "Service provider profile not found" });
 
     const { _id, user, __v, ...providerData } = serviceProvider;
-    const response = { ...providerData, email: user.email };
-
-    res.status(200).json(response);
+    res.status(200).json({ ...providerData, email: user.email });
   } catch (err) {
     console.error("Get service provider profile error:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -204,11 +197,177 @@ export const updateServiceProviderProfile = async (req, res) => {
     if (!serviceProvider) return res.status(404).json({ error: "Service provider profile not found" });
 
     const { _id, user, __v, ...providerData } = serviceProvider.toObject();
-    const response = { ...providerData, email: user.email };
-
-    res.status(200).json({ message: "Profile updated", profile: response });
+    res.status(200).json({ message: "Profile updated", profile: { ...providerData, email: user.email } });
   } catch (err) {
     console.error("Update service provider profile error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// -------------------- Service Requests --------------------
+
+// Get all service requests for the provider
+export const getServiceProviderRequests = async (req, res) => {
+  try {
+    const loggedInUserId = req.user.id;
+
+    const requests = await ServiceRequest.find({ providerId: loggedInUserId })
+      .populate("userId", "username email")
+      .populate("serviceId", "name description price")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: requests.length, data: requests });
+  } catch (error) {
+    console.error("Error fetching service provider requests:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// Accept or Reject a service request and send email
+
+export const updateRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["Accepted", "Rejected"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    // Find request by ID
+    const request = await ServiceRequest.findById(id)
+      .populate("userId", "username email")
+      .populate("serviceId", "name");
+
+    if (!request) {
+      return res.status(404).json({ success: false, message: "Request not found" });
+    }
+
+    // Optional: verify provider owns this request
+    if (request.providerId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Update status
+    request.status = status;
+    await request.save();
+
+    // Send email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: request.userId.email,
+      subject: `Your request for ${request.serviceId.name} is ${status}`,
+      text: `Hello ${request.userId.username},\n\nYour request for "${request.serviceId.name}" has been ${status.toLowerCase()} by the service provider.\n\nRegards,\nLocal Aid Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ success: true, message: `Request ${status.toLowerCase()}`, request });
+  } catch (error) {
+    console.error("Update request error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+// Get only accepted requests for a provider
+export const getAcceptedRequests = async (req, res) => {
+  try {
+    const providerId = req.user.id; // get logged-in provider ID
+
+    // Find requests with status "Accepted" for this provider
+    const requests = await ServiceRequest.find({ 
+      providerId, 
+      status: "Accepted" 
+    })
+      .populate("userId", "username email")
+      .populate("serviceId", "name description price")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ 
+      success: true, 
+      count: requests.length, 
+      data: requests 
+    });
+  } catch (error) {
+    console.error("Error fetching accepted requests:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server Error" 
+    });
+  }
+};
+
+
+// PUT /api/provider/requests/:id
+export const updateRequestStatus1 = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!["Working", "Completed", "Rejected"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
+    }
+
+    // Find request by ID
+    const request = await ServiceRequest.findById(id)
+      .populate("userId", "username email")
+      .populate("serviceId", "name");
+
+    if (!request) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Request not found" });
+    }
+
+    // Verify provider owns this request
+    if (request.providerId.toString() !== req.user.id) {
+      console.log("Unauthorized attempt", {
+        providerId: request.providerId.toString(),
+        userId: req.user.id,
+      });
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Update status
+    request.status = status;
+    await request.save();
+
+    // Send email to requester
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: request.userId.email,
+      subject: `Your request for ${request.serviceId.name} is ${status}`,
+      text: `Hello ${request.userId.username},\n\nYour request for "${request.serviceId.name}" has been marked as ${status.toLowerCase()} by the service provider.\n\nRegards,\nLocal Aid Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res
+      .status(200)
+      .json({ success: true, message: `Request marked as ${status}`, request });
+  } catch (error) {
+    console.error("Update request error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Controller function for fetching provider requests
+export const getProviderRequests = async (req, res) => {
+  try {
+    const requests = await ServiceRequest.find({
+      providerId: req.user.id, // make sure this points to your provider
+      status: { $in: ["Accepted", "Working", "Completed"] },
+    })
+      .populate("userId", "username email")
+      .populate("serviceId", "name description price");
+
+    res.status(200).json({ success: true, data: requests });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

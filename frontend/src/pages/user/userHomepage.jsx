@@ -21,9 +21,9 @@ const UserHomepage = () => {
       ),
     },
     {
-      title: "Add Service",
+      title: " Services",
       icon: (
-        <div onClick={() => navigate("/serviceprovider/addservice")}>
+        <div onClick={() => navigate("/user/viewservices")}>
           <IconBriefcase2 className="h-6 w-6 text-black" />
         </div>
       ),
