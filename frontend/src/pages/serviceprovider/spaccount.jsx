@@ -14,10 +14,13 @@ const SPAccount = () => {
     phone: "",
     address: "",
   });
+  const [availability, setAvailability] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [pendingAvailability, setPendingAvailability] = useState(false);
 
   const navigate = useNavigate();
 
-  // Fetch provider details with auth check
+  // Fetch provider details
   const fetchProviderDetails = async () => {
     try {
       setLoading(true);
@@ -31,10 +34,11 @@ const SPAccount = () => {
         phone: res.data.phone || "",
         address: res.data.address || "",
       });
+      setAvailability(res.data.is_available ?? true);
     } catch (error) {
       console.error(error);
       toast.error("Session expired. Please login again.");
-      navigate("/login", { replace: true }); // Redirect if unauthenticated
+      navigate("/login", { replace: true });
     } finally {
       setLoading(false);
     }
@@ -44,13 +48,11 @@ const SPAccount = () => {
     fetchProviderDetails();
   }, []);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -62,12 +64,39 @@ const SPAccount = () => {
       );
       toast.success("Account details updated successfully");
       setEditing(false);
-      setProvider((prev) => ({ ...prev, ...formData })); // update local state
+      setProvider((prev) => ({ ...prev, ...formData }));
     } catch (error) {
       console.error(error);
       toast.error("Failed to update account details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Trigger modal on toggle
+  const handleToggleClick = () => {
+    setPendingAvailability(!availability);
+    setShowModal(true);
+  };
+
+  // Confirm availability change
+  const confirmAvailabilityChange = async () => {
+    try {
+      setAvailability(pendingAvailability);
+      await axios.put(
+        "http://localhost:5001/api/provider/availability",
+        { is_available: pendingAvailability },
+        { withCredentials: true }
+      );
+      toast.success(
+        `Availability updated: ${pendingAvailability ? "Available" : "Unavailable"}`
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update availability");
+      setAvailability((prev) => !prev); // rollback on error
+    } finally {
+      setShowModal(false);
     }
   };
 
@@ -87,12 +116,33 @@ const SPAccount = () => {
       <div className="w-full fixed top-0 left-0 z-50 bg-gray-900">
         <SPNavbar />
       </div>
-      {/* Added extra top padding so content is not hidden under navbar */}
+
       <div className="flex-grow pt-32 pb-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-white mb-6">
-            Account Details
-          </h2>
+        <div className="max-w-3xl mx-auto bg-gray-800 rounded-lg shadow-md p-6 space-y-6">
+          {/* Availability Section */}
+          <div className="flex items-center justify-between bg-gray-700 px-4 py-3 rounded-md">
+            <span
+              className={`font-semibold text-white ${
+                availability ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {availability ? "Available" : "Unavailable"}
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={availability}
+                onChange={handleToggleClick}
+                className="sr-only peer"
+              />
+              <div className="w-14 h-8 bg-gray-600 rounded-full peer peer-checked:bg-green-600 
+                              peer-focus:outline-none transition-all duration-300"></div>
+              <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full 
+                              transition-transform duration-300 peer-checked:translate-x-6"></div>
+            </label>
+          </div>
+
+          <h2 className="text-2xl font-bold text-white">Account Details</h2>
 
           {provider ? (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -204,6 +254,34 @@ const SPAccount = () => {
           )}
         </div>
       </div>
+
+      {/* ✅ Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-80">
+            <h3 className="text-lg font-semibold text-white mb-4">Confirm Change</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to set yourself as{" "}
+              {pendingAvailability ? "Available" : "Unavailable"}?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                onClick={confirmAvailabilityChange}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
