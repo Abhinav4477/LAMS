@@ -42,13 +42,7 @@ const ServiceView = () => {
   const [newReview, setNewReview] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
-    useEffect(() => {
-  // Prevent browser from caching the page
-  window.history.replaceState(null, "", window.location.href);
-  window.onpopstate = () => {
-    window.location.replace("/login"); // force redirect if back is clicked
-  };
-}, []);
+    
   // Fetch service
   const fetchService = async () => {
     try {
@@ -189,7 +183,7 @@ const ServiceView = () => {
 
         {/* Service info */}
         <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
-          <button onClick={() => navigate(-1)} className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded z-10">&larr; Go Back</button>
+          <button onClick={() => navigate("/user/viewservices")} className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded z-10">&larr; Go Back</button>
           {service.coverImage && <img src={`http://localhost:5001/${service.coverImage}`} alt={service.name} className="w-full md:w-1/2 h-64 md:h-auto object-cover" />}
           <div className="p-6 flex flex-col flex-1 space-y-2">
             <h1 className="text-3xl font-bold">{service.name}</h1>
