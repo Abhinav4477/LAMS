@@ -5,6 +5,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+// Example: Import images from src/assets (optional)
+import newWorkImg from "/pt1.png";
+import manageWorkImg from "/pt2.png";
+import transactionsImg from "/pt3.png";
+import reportImg from "/pt4.png";
+
 function Navbar({ className }) {
   const [active, setActive] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -63,7 +69,7 @@ function Navbar({ className }) {
           className="flex items-center space-x-2 flex-shrink-0"
         >
           <img
-            src="/public/logo.png"
+            src="/logo.png" // public/logo.png
             alt="LAMS Logo"
             className="h-8 w-auto cursor-pointer"
           />
@@ -97,32 +103,32 @@ function Navbar({ className }) {
                 <div onClick={handleNavigate("/serviceprovider/viewrequests")}>
                   <ProductItem
                     title="New Work"
-                    src="https://assets.aceternity.com/demos/algochurn.webp"
-                    description="Prepare for tech interviews like never before."
+                    src={newWorkImg} // src/assets/pt1.png OR public path "/images/pt1.png"
+                    description="Find Your New Requests Here."
                   />
                 </div>
 
                 <div onClick={handleNavigate("/serviceprovider/manage")}>
                   <ProductItem
                     title="Manage Work"
-                    src="https://assets.aceternity.com/demos/tailwindmasterkit.webp"
-                    description="Production ready Tailwind CSS components for your next project"
+                    src={manageWorkImg} // src/assets/manage-work.png OR public path "/images/manage-work.png"
+                    description="Manage Your Accepted Works Here."
                   />
                 </div>
 
                 <div onClick={handleNavigate("/serviceprovider/transaction")}>
                   <ProductItem
                     title="Transactions"
-                    src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
-                    description="Never write from scratch again. Go from idea to blog in minutes."
+                    src={transactionsImg} // src/assets/transactions.png OR public path "/images/transactions.png"
+                    description="See Your Transaction History."
                   />
                 </div>
 
                 <div onClick={handleNavigate("/serviceprovider/report")}>
                   <ProductItem
                     title="Report"
-                    src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.47.07%E2%80%AFPM.png"
-                    description="Respond to government RFPs, RFIs and RFQs 10x faster using AI"
+                    src={reportImg} // src/assets/report.png OR public path "/images/report.png"
+                    description="See Your Service Reports."
                   />
                 </div>
               </div>
