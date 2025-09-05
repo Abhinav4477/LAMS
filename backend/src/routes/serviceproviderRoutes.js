@@ -11,7 +11,8 @@ import {
   updateRequestStatus,
   getAcceptedRequests,
   updateRequestStatus1,
-  getProviderRequests
+  getProviderRequests,
+  updateAvailability
 } from "../controllers/serviceproviderController.js";
 import { authenticateUser } from "../middleware/auth.js";
 import upload from "../middleware/upload.js"; // Multer upload utility
@@ -53,6 +54,10 @@ router.get("/requests/accepted", authenticateUser, getAcceptedRequests);
 router.put("/request/:id", authenticateUser, updateRequestStatus1);
 
 router.get("/requests/all", authenticateUser, getProviderRequests);
+
+
+//Route to update avilability
+router.put("/availability", authenticateUser, updateAvailability);
 
 
 export default router;

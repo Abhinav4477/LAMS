@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import Payment from "../models/Payment.js"
 import Customer from "../models/Customer.js"
 import User from "../models/Users.js"
+import ServiceProvider from "../models/Serviceprovider.js"
 
 // Helper to convert string to ObjectId safely
 const toObjectId = (id) => {
@@ -21,6 +22,7 @@ export const getAllServices = async (req, res) => {
     const { categoryId, stateId, districtId, locationId, minPrice, maxPrice, sortBy } = req.query;
     const query = {};
 
+    // ---------- Filtering ----------
     if (categoryId) query.category = categoryId;
     if (locationId) query.location = locationId;
     else if (districtId) query["location.district"] = districtId;
@@ -32,10 +34,19 @@ export const getAllServices = async (req, res) => {
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
 
+    // ---------- Sorting ----------
     let sort = { createdAt: -1 };
     if (sortBy === "priceAsc") sort = { price: 1 };
     if (sortBy === "priceDesc") sort = { price: -1 };
 
+    // ---------- Get available providers (user IDs) ----------
+    const availableProviders = await ServiceProvider.find({ is_available: true }).select("user");
+    const availableUserIds = availableProviders.map((p) => p.user);
+
+    // Add provider filter
+    query.provider = { $in: availableUserIds };
+
+    // ---------- Fetch services ----------
     const services = await Service.find(query)
       .populate("category")
       .populate({
@@ -45,7 +56,7 @@ export const getAllServices = async (req, res) => {
           populate: { path: "state" },
         },
       })
-      .populate("provider", "username email")
+      .populate("provider", "username email") // provider is the user ID
       .sort(sort);
 
     res.json(services);
@@ -54,6 +65,8 @@ export const getAllServices = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch services" });
   }
 };
+
+
 
 // Get service by ID
 export const getServiceById = async (req, res) => {

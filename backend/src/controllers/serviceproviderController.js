@@ -371,3 +371,35 @@ export const getProviderRequests = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+//FUnction to update status of service provider
+
+export const updateAvailability = async (req, res) => {
+  try {
+    const { is_available } = req.body;
+
+    if (typeof is_available !== "boolean") {
+      return res.status(400).json({ message: "is_available must be true or false" });
+    }
+
+    // Find service provider by user ID (from auth middleware)
+    const serviceProvider = await ServiceProvider.findOneAndUpdate(
+      { user: req.user.id },
+      { is_available },
+      { new: true }
+    );
+
+    if (!serviceProvider) {
+      return res.status(404).json({ message: "Service provider not found" });
+    }
+
+    res.status(200).json({
+      message: "Availability updated successfully",
+      serviceProvider,
+    });
+  } catch (error) {
+    console.error("Error updating availability:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
