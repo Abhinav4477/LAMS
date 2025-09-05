@@ -1,6 +1,7 @@
 import Payment from "../models/Payment.js";
 import ServiceRequest from "../models/ServiceRequest.js";
 import User from "../models/Users.js"; // import User model
+import ServiceProvider from "../models/Serviceprovider.js"
 import { v4 as uuidv4 } from "uuid";
 
 // Make payment and generate receipt
@@ -76,5 +77,35 @@ export const getPaymentHistory = async (req, res) => {
   } catch (err) {
     console.error("Error fetching payment history:", err);
     res.status(500).json({ message: "Failed to fetch payment history" });
+  }
+};
+
+
+//payment history of provider 
+
+export const getProviderTransactionHistory = async (req, res) => {
+  try {
+    const providerId = req.user.id; // from JWT
+
+    const transactions = await Payment.find({ providerId })
+      .populate("serviceId", "name")       // fetch service name
+      .populate("userId", "username name") // fetch customer username/name
+      .sort({ createdAt: -1 });
+
+    // Format the data for frontend
+    const formatted = transactions.map(t => ({
+      _id: t._id,
+      receiptId: t.receiptId,
+      amount: t.amount,
+      status: t.status,
+      date: t.createdAt?.toISOString().split("T")[0], // YYYY-MM-DD
+      service: t.serviceId?.name || "N/A",
+      customer: t.userId?.username || t.userId?.name || "Unknown"
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Error fetching provider transactions:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

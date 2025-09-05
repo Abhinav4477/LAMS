@@ -110,7 +110,7 @@ function Navbar({ className }) {
                   />
                 </div>
 
-                <div onClick={handleNavigate("/serviceprovider/transactions")}>
+                <div onClick={handleNavigate("/serviceprovider/transaction")}>
                   <ProductItem
                     title="Transactions"
                     src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
