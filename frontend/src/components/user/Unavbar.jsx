@@ -81,7 +81,7 @@ const NavbarDemo = () => {
           }))}
         />
         <div className="flex items-center gap-4">
-          <NavbarButton onClick={() => handleNavigate("/account")} variant="secondary">
+          <NavbarButton onClick={() => handleNavigate("/user/account")} variant="secondary">
             Account
           </NavbarButton>
           <NavbarButton onClick={handleLogout} variant="primary">
@@ -112,7 +112,7 @@ const NavbarDemo = () => {
             </button>
           ))}
           <div className="flex w-full flex-col gap-4 mt-4">
-            <NavbarButton onClick={() => handleNavigate("/account")} variant="secondary" className="w-full">
+            <NavbarButton onClick={() => handleNavigate("/user/account")} variant="secondary" className="w-full">
               Account
             </NavbarButton>
             <NavbarButton onClick={handleLogout} variant="primary" className="w-full">

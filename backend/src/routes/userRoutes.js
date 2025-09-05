@@ -6,6 +6,8 @@ import {
   checkServiceRequest,
   getMyRequests,
   cancelServiceRequest,
+  getCustomerDetails,
+  updateCustomerDetails
 } from "../controllers/userController.js";
 import { authenticateUser } from "../middleware/auth.js";
 
@@ -28,5 +30,11 @@ router.get("/service-request/my-requests", authenticateUser, getMyRequests);
 
 // Cancel a service request
 router.patch("/service-request/:id/cancel", authenticateUser, cancelServiceRequest);
+
+// Get account details
+router.get("/account", authenticateUser, getCustomerDetails);
+
+// Update account details
+router.put("/account", authenticateUser, updateCustomerDetails);
 
 export default router;

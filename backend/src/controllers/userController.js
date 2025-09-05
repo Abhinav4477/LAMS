@@ -3,6 +3,8 @@ import Service from "../models/Service.js";
 import ServiceRequest from "../models/Servicerequest.js";
 import mongoose from "mongoose";
 import Payment from "../models/Payment.js"
+import Customer from "../models/Customer.js"
+import User from "../models/Users.js"
 
 // Helper to convert string to ObjectId safely
 const toObjectId = (id) => {
@@ -210,5 +212,83 @@ export const getMyRequests = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user requests:", error);
     res.status(500).json({ message: "Server error while fetching requests" });
+  }
+};
+
+//Function to get user info 
+
+export const getCustomerDetails = async (req, res) => {
+  try {
+    console.log("🔹 Incoming user object from middleware:", req.user);
+
+    // Fallback in case JWT payload has id instead of _id
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized: No user ID found" });
+    }
+
+    console.log("🔹 Resolved userId:", userId);
+
+    // Populate user info along with customer info
+    const customer = await Customer.findOne({ user: userId }).populate(
+      "user",
+      "username email role"
+    );
+
+    if (!customer) {
+      console.log("⚠️ No customer document found for userId:", userId);
+      return res.status(404).json({ error: "Customer details not found" });
+    }
+
+    res.status(200).json({
+      name: customer.name,
+      phone: customer.phone,
+      age: customer.age,
+      gender: customer.gender,
+      username: customer.user.username,
+      email: customer.user.email,
+      role: customer.user.role,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching customer details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+//function to update user info
+
+//function to update user info
+export const updateCustomerDetails = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.id; // ✅ safer check
+    const { name, phone, age, gender, username, email } = req.body;
+
+    // Update User fields (username, email) if provided
+    let user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+
+    await user.save();
+
+    // Update Customer fields
+    let customer = await Customer.findOne({ user: userId });
+    if (!customer) return res.status(404).json({ error: "Customer details not found" });
+
+    if (name) customer.name = name;
+    if (phone) customer.phone = phone;
+    if (age) customer.age = age;
+    if (gender) customer.gender = gender;
+
+    await customer.save();
+
+    res.status(200).json({ message: "Account updated successfully" });
+  } catch (error) {
+    console.error("Error updating customer details:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
