@@ -4,7 +4,8 @@ import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
 import { FlipWords } from "../../components/ui/flip-words";
 import { FloatingDock } from "../../components/ui/floating-dock";
-import { IconBrandGithub, IconBrandX, IconExchange, IconHome, IconUserScreen, IconBriefcase2 } from "@tabler/icons-react";
+import { IconUser,IconHistory, IconHome, IconUserScreen, IconBriefcase2 } from "@tabler/icons-react";
+import { useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 const UserHomepage = () => {
@@ -29,46 +30,39 @@ const UserHomepage = () => {
       ),
     },
     {
-      title: "View Services",
+      title: "View Requests",
       icon: (
-        <div onClick={() => navigate("/serviceprovider/viewservices")}>
+        <div onClick={() => navigate("/user/viewrequests")}>
           <IconUserScreen className="h-6 w-6 text-black" />
         </div>
       ),
     },
     {
-      title: "Aceternity UI",
+      title: "History",
       icon: (
-        <div onClick={() => navigate("/aceternity-ui")}>
-          <img src="https://assets.aceternity.com/logo-dark.png" width={20} height={20} alt="Aceternity Logo" />
+        <div onClick={() => navigate("/user/history")}>
+          <IconHistory className="h-6 w-6 text-black" />
         </div>
       ),
     },
+   
     {
-      title: "Changelog",
+      title: "Account",
       icon: (
-        <div onClick={() => navigate("/changelog")}>
-          <IconExchange className="h-6 w-6 text-black" />
-        </div>
-      ),
-    },
-    {
-      title: "Twitter",
-      icon: (
-        <div onClick={() => window.open("https://twitter.com", "_blank")}>
-          <IconBrandX className="h-6 w-6 text-black" />
-        </div>
-      ),
-    },
-    {
-      title: "GitHub",
-      icon: (
-        <div onClick={() => window.open("https://github.com", "_blank")}>
-          <IconBrandGithub className="h-6 w-6 text-black" />
+        <div onClick={() => navigate("/user/account")}>
+          <IconUser className="h-6 w-6 text-black" />
         </div>
       ),
     },
   ];
+
+   useEffect(() => {
+  // Prevent browser from caching the page
+  window.history.replaceState(null, "", window.location.href);
+  window.onpopstate = () => {
+    window.location.replace("/login"); // force redirect if back is clicked
+  };
+}, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-black antialiased overflow-hidden relative">
