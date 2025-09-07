@@ -5,12 +5,13 @@ import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
 import { FloatingDock } from "../../components/ui/floating-dock";
 import {
-  IconBrandGithub,
-  IconBrandX,
+  IconUserCircle,
+  IconBrandCashapp,
   IconExchange,
   IconHome,
   IconUserScreen,
   IconBriefcase2,
+  IconFileDescription
 } from "@tabler/icons-react";
 
 const ServiceProviderHomepage = () => {
@@ -42,34 +43,34 @@ const ServiceProviderHomepage = () => {
       ),
     },
     {
-      title: "Aceternity UI",
+      title: "New Requests",
       icon: (
-        <div onClick={() => navigate("/aceternity-ui")}>
-          <img src="https://assets.aceternity.com/logo-dark.png" width={20} height={20} alt="Aceternity Logo" />
-        </div>
-      ),
-    },
-    {
-      title: "Changelog",
-      icon: (
-        <div onClick={() => navigate("/changelog")}>
+        <div onClick={() => navigate("/serviceprovider/viewrequests")}>
           <IconExchange className="h-6 w-6 text-black" />
         </div>
       ),
     },
     {
-      title: "Twitter",
+      title: "Manage Requests",
       icon: (
-        <div onClick={() => window.open("https://twitter.com", "_blank")}>
-          <IconBrandX className="h-6 w-6 text-black" />
+        <div onClick={() => navigate("/serviceprovider/manage")}>
+          <IconFileDescription className="h-6 w-6 text-black" />
         </div>
       ),
     },
     {
-      title: "GitHub",
+      title: "Transactions",
       icon: (
-        <div onClick={() => window.open("https://github.com", "_blank")}>
-          <IconBrandGithub className="h-6 w-6 text-black" />
+        <div onClick={() => navigate("/serviceprovider/transaction")}>
+          <IconBrandCashapp className="h-6 w-6 text-black" />
+        </div>
+      ),
+    },
+    {
+      title: "Account",
+      icon: (
+        <div onClick={() => navigate("/serviceprovider/spaccount")}>
+          <IconUserCircle className="h-6 w-6 text-black" />
         </div>
       ),
     },
