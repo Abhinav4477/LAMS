@@ -33,6 +33,7 @@ import TransactionHistory from './pages/user/history.jsx'
 import Account from './pages/user/account.jsx'
 import Transaction from "./pages/serviceprovider/transactions.jsx"
 import Report from "./pages/serviceprovider/report.jsx"
+import AboutPage from './pages/about.jsx'
 
 import { Toaster } from 'react-hot-toast'
 
@@ -74,6 +75,7 @@ const App = () => {
       <Route path='/user/account' element={<Account/>}  />
       <Route path='/serviceprovider/transaction' element={<Transaction />}  />
       <Route path='/serviceprovider/report' element={<Report/>}  />
+      <Route path='/about' element={<AboutPage/>}/>
       
 
 
