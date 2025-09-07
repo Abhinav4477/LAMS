@@ -38,7 +38,7 @@ const homePage = () => {
       <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 space-x-0 md:space-x-4">
        
          <Link to="/login"  className="w-40 h-10 rounded-xl bg-transparent border dark:border-white border-white text-white text-sm flex items-center justify-center z-10 hover:bg-white hover:text-black transition-colors duration-300">
-  Join now
+  Login
 </Link>
 
         
