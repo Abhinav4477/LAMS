@@ -16,6 +16,7 @@
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
     "daisyui": "^5.0.46",
+    "framer-motion": "^12.23.12",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^4.0.0",
