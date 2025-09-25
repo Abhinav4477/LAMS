@@ -56,7 +56,7 @@ export const getAllServices = async (req, res) => {
           populate: { path: "state" },
         },
       })
-      .populate("provider", "username email") // provider is the user ID
+      .populate("provider", "username email")
       .sort(sort);
 
     res.json(services);
@@ -65,8 +65,6 @@ export const getAllServices = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch services" });
   }
 };
-
-
 
 // Get service by ID
 export const getServiceById = async (req, res) => {
@@ -201,14 +199,12 @@ export const getMyRequests = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Step 1: Find all payments that are Paid
     const paidPayments = await Payment.find({ userId, status: "Paid" }).select("requestId");
     const paidRequestIds = paidPayments.map((p) => p.requestId);
 
-    // Step 2: Fetch ServiceRequests that are NOT in paidRequestIds
     const requests = await ServiceRequest.find({
       userId,
-      _id: { $nin: paidRequestIds }, // exclude paid requests
+      _id: { $nin: paidRequestIds },
     })
       .populate({
         path: "serviceId",
@@ -228,29 +224,21 @@ export const getMyRequests = async (req, res) => {
   }
 };
 
-//Function to get user info 
-
+// Function to get user info
 export const getCustomerDetails = async (req, res) => {
   try {
-    console.log("🔹 Incoming user object from middleware:", req.user);
-
-    // Fallback in case JWT payload has id instead of _id
     const userId = req.user?._id || req.user?.id;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized: No user ID found" });
     }
 
-    console.log("🔹 Resolved userId:", userId);
-
-    // Populate user info along with customer info
     const customer = await Customer.findOne({ user: userId }).populate(
       "user",
       "username email role"
     );
 
     if (!customer) {
-      console.log("⚠️ No customer document found for userId:", userId);
       return res.status(404).json({ error: "Customer details not found" });
     }
 
@@ -264,31 +252,24 @@ export const getCustomerDetails = async (req, res) => {
       role: customer.user.role,
     });
   } catch (error) {
-    console.error("❌ Error fetching customer details:", error);
+    console.error("Error fetching customer details:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-
-
-//function to update user info
-
-//function to update user info
+// Function to update user info
 export const updateCustomerDetails = async (req, res) => {
   try {
-    const userId = req.user._id || req.user.id; // ✅ safer check
+    const userId = req.user._id || req.user.id;
     const { name, phone, age, gender, username, email } = req.body;
 
-    // Update User fields (username, email) if provided
     let user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (username) user.username = username;
     if (email) user.email = email;
-
     await user.save();
 
-    // Update Customer fields
     let customer = await Customer.findOne({ user: userId });
     if (!customer) return res.status(404).json({ error: "Customer details not found" });
 
@@ -296,7 +277,6 @@ export const updateCustomerDetails = async (req, res) => {
     if (phone) customer.phone = phone;
     if (age) customer.age = age;
     if (gender) customer.gender = gender;
-
     await customer.save();
 
     res.status(200).json({ message: "Account updated successfully" });

@@ -10,13 +10,13 @@ import nodemailer from "nodemailer";
 
 // Nodemailer transporter for sending emails
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
-    port: Number(process.env.SMTP_PORT), // 587
-    secure: false,                       // true for 465, false for 587
-    auth: {
-        user: process.env.SMTP_USERNAME,
-        pass: process.env.SMTP_PASSWORD,
-    },
+  host: process.env.SMTP_HOST,        // smtp-relay.brevo.com
+  port: Number(process.env.SMTP_PORT), // 587
+  secure: false,                       // true for 465, false for 587
+  auth: {
+    user: process.env.SMTP_USERNAME,
+    pass: process.env.SMTP_PASSWORD,
+  },
 });
 
 // -------------------- Service CRUD --------------------
@@ -224,7 +224,6 @@ export const getServiceProviderRequests = async (req, res) => {
 };
 
 // Accept or Reject a service request and send email
-
 export const updateRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -234,7 +233,6 @@ export const updateRequestStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    // Find request by ID
     const request = await ServiceRequest.findById(id)
       .populate("userId", "username email")
       .populate("serviceId", "name");
@@ -243,16 +241,13 @@ export const updateRequestStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Request not found" });
     }
 
-    // Optional: verify provider owns this request
     if (request.providerId.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Update status
     request.status = status;
     await request.save();
 
-    // Send email
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: request.userId.email,
@@ -269,74 +264,48 @@ export const updateRequestStatus = async (req, res) => {
   }
 };
 
-
 // Get only accepted requests for a provider
 export const getAcceptedRequests = async (req, res) => {
   try {
-    const providerId = req.user.id; // get logged-in provider ID
+    const providerId = req.user.id;
 
-    // Find requests with status "Accepted" for this provider
-    const requests = await ServiceRequest.find({ 
-      providerId, 
-      status: "Accepted" 
-    })
+    const requests = await ServiceRequest.find({ providerId, status: "Accepted" })
       .populate("userId", "username email")
       .populate("serviceId", "name description price")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({ 
-      success: true, 
-      count: requests.length, 
-      data: requests 
-    });
+    res.status(200).json({ success: true, count: requests.length, data: requests });
   } catch (error) {
     console.error("Error fetching accepted requests:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server Error" 
-    });
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-
-// PUT /api/provider/requests/:id
+// Update request status (Working / Completed / Rejected)
 export const updateRequestStatus1 = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    // Validate status
     if (!["Working", "Completed", "Rejected"].includes(status)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid status" });
+      return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    // Find request by ID
     const request = await ServiceRequest.findById(id)
       .populate("userId", "username email")
       .populate("serviceId", "name");
 
     if (!request) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Request not found" });
+      return res.status(404).json({ success: false, message: "Request not found" });
     }
 
-    // Verify provider owns this request
     if (request.providerId.toString() !== req.user.id) {
-      console.log("Unauthorized attempt", {
-        providerId: request.providerId.toString(),
-        userId: req.user.id,
-      });
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Update status
     request.status = status;
     await request.save();
 
-    // Send email to requester
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: request.userId.email,
@@ -346,9 +315,7 @@ export const updateRequestStatus1 = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res
-      .status(200)
-      .json({ success: true, message: `Request marked as ${status}`, request });
+    res.status(200).json({ success: true, message: `Request marked as ${status}`, request });
   } catch (error) {
     console.error("Update request error:", error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -359,7 +326,7 @@ export const updateRequestStatus1 = async (req, res) => {
 export const getProviderRequests = async (req, res) => {
   try {
     const requests = await ServiceRequest.find({
-      providerId: req.user.id, // make sure this points to your provider
+      providerId: req.user.id,
       status: { $in: ["Accepted", "Working", "Completed"] },
     })
       .populate("userId", "username email")
@@ -367,14 +334,12 @@ export const getProviderRequests = async (req, res) => {
 
     res.status(200).json({ success: true, data: requests });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching provider requests:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-
-//FUnction to update status of service provider
-
+// Update provider availability
 export const updateAvailability = async (req, res) => {
   try {
     const { is_available } = req.body;
@@ -383,7 +348,6 @@ export const updateAvailability = async (req, res) => {
       return res.status(400).json({ message: "is_available must be true or false" });
     }
 
-    // Find service provider by user ID (from auth middleware)
     const serviceProvider = await ServiceProvider.findOneAndUpdate(
       { user: req.user.id },
       { is_available },

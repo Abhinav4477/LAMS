@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 const NavbarDemo = () => {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: "Services", link: "/user/viewservices" },
@@ -21,67 +22,57 @@ const NavbarDemo = () => {
     { name: "History", link: "/user/history" },
   ];
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // ---------- Check login with backend ----------
+  // ---------- Safe login check ----------
   useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const res = await fetch("http://localhost:5001/api/auth/me", {
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Not logged in");
-      } catch (err) {
-        window.location.replace("/login"); // redirect to login if not logged in
-      }
-
-      // Disable back navigation
-      window.history.pushState(null, "", window.location.href);
-      const handleBack = () => window.history.pushState(null, "", window.location.href);
-      window.addEventListener("popstate", handleBack);
-
-      return () => window.removeEventListener("popstate", handleBack);
-    };
-
-    checkLogin();
-  }, []);
+    const user = localStorage.getItem("user");
+    if (!user) {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
 
   // ---------- Navigation ----------
   const handleNavigate = (link) => {
-    navigate(link, { replace: true });
+    navigate(link);
     if (isMobileMenuOpen) setIsMobileMenuOpen(false);
   };
 
   // ---------- Logout ----------
   const handleLogout = async () => {
-  try {
-    await fetch("http://localhost:5001/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    window.location.replace("/login"); // force reload
-  } catch (err) {
-    console.error("Logout failed:", err);
-  }
-};
-
+    try {
+      await fetch("http://localhost:5001/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      localStorage.removeItem("user"); // clear session
+      navigate("/login", { replace: true });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   return (
     <Navbar>
       {/* Desktop */}
       <NavBody>
-        <div onClick={() => handleNavigate("/user/userHomepage")} className="cursor-pointer">
+        <div
+          onClick={() => handleNavigate("/user/userHomepage")}
+          className="cursor-pointer"
+        >
           <NavbarLogo />
         </div>
+
         <NavItems
           items={navItems.map((item) => ({
             ...item,
             onClick: () => handleNavigate(item.link),
           }))}
         />
+
         <div className="flex items-center gap-4">
-          <NavbarButton onClick={() => handleNavigate("/user/account")} variant="secondary">
+          <NavbarButton
+            onClick={() => handleNavigate("/user/account")}
+            variant="secondary"
+          >
             Account
           </NavbarButton>
           <NavbarButton onClick={handleLogout} variant="primary">
@@ -93,7 +84,10 @@ const NavbarDemo = () => {
       {/* Mobile */}
       <MobileNav>
         <MobileNavHeader>
-          <div onClick={() => handleNavigate("/user/userHomepage")} className="cursor-pointer">
+          <div
+            onClick={() => handleNavigate("/user/userHomepage")}
+            className="cursor-pointer"
+          >
             <NavbarLogo />
           </div>
           <MobileNavToggle
@@ -101,7 +95,11 @@ const NavbarDemo = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           />
         </MobileNavHeader>
-        <MobileNavMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
+
+        <MobileNavMenu
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+        >
           {navItems.map((item, idx) => (
             <button
               key={`mobile-link-${idx}`}
@@ -112,10 +110,18 @@ const NavbarDemo = () => {
             </button>
           ))}
           <div className="flex w-full flex-col gap-4 mt-4">
-            <NavbarButton onClick={() => handleNavigate("/user/account")} variant="secondary" className="w-full">
+            <NavbarButton
+              onClick={() => handleNavigate("/user/account")}
+              variant="secondary"
+              className="w-full"
+            >
               Account
             </NavbarButton>
-            <NavbarButton onClick={handleLogout} variant="primary" className="w-full">
+            <NavbarButton
+              onClick={handleLogout}
+              variant="primary"
+              className="w-full"
+            >
               Logout
             </NavbarButton>
           </div>

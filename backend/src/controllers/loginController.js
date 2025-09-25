@@ -24,10 +24,8 @@ export const login = async (req, res) => {
       is_verified = provider.is_verified;
     }
 
-    // generate token if you use JWT
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    // send token in httpOnly cookie and in response body
     res
       .cookie("token", token, {
         httpOnly: true,
@@ -39,14 +37,15 @@ export const login = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        is_verified, // send verification status
-        token,       // include for frontend if needed
+        is_verified,
+        token,
       });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 // -------------------- CREATE CUSTOMER ACCOUNT --------------------
 export const createAccount = async (req, res) => {
   const { username, email, password, role, name, phone, age, gender } = req.body;
@@ -99,19 +98,14 @@ export const createAccount = async (req, res) => {
 };
 
 // -------------------- LOGOUT --------------------
-// controllers/authController.js
-
 export const logout = (req, res) => {
   try {
-    // Clear the cookie with the same options used when setting it
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      path: "/", // must match the path when cookie was set
+      path: "/",
     });
-
-    // Respond with success message
     res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     console.error("Logout error:", err);
@@ -119,46 +113,35 @@ export const logout = (req, res) => {
   }
 };
 
-
-
 // -------------------- CREATE SERVICE PROVIDER --------------------
 export const createServiceProvider = async (req, res) => {
   try {
     const { name, phone, address, username, email, password } = req.body;
-    console.log("Request body:", req.body);
 
-    // Basic validation
     if (!name || !phone || !address || !username || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Check if username exists
     const existingUserByUsername = await User.findOne({ username });
     if (existingUserByUsername) {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    // Check if email exists
     const existingUserByEmail = await User.findOne({ email });
     if (existingUserByEmail) {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Password hashed");
 
-    // Create user
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      role: 'provider', // matches enum in schema
+      role: 'provider',
     });
     const savedUser = await newUser.save();
-    console.log("User saved:", savedUser._id);
 
-    // Create service provider (without category)
     const newProvider = new ServiceProvider({
       name,
       phone,
@@ -168,9 +151,7 @@ export const createServiceProvider = async (req, res) => {
       is_available: true,
     });
     await newProvider.save();
-    console.log("Service Provider saved");
 
-    // Send email notification
     const mailOptions = {
       from: process.env.SENDER_EMAIL,
       to: email,
@@ -178,19 +159,16 @@ export const createServiceProvider = async (req, res) => {
       text: `Hello ${name}, your service provider account has been created successfully!`,
     };
     await transporter.sendMail(mailOptions);
-    console.log("Email sent to provider");
 
     res.status(201).json({
       message: 'Service Provider created successfully',
       provider: newProvider,
     });
-
   } catch (error) {
     console.error("Error in createServiceProvider:", error);
     res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 };
-
 
 export const useCheckLogin = async (req, res, next) => {
   try {
@@ -206,8 +184,8 @@ export const useCheckLogin = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    req.user = user; // attach user to request
-    next(); // continue to next middleware or route
+    req.user = user;
+    next();
   } catch (err) {
     console.error("useCheckLogin error:", err);
     return res.status(401).json({ message: "Unauthorized" });
