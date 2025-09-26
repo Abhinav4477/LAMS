@@ -19,6 +19,7 @@ const CreateAccount = () => {
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  const [address, setAddress] = useState(""); // ✅ new state for address
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [role] = useState("user");
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const CreateAccount = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password || !name || !phone || !age || !gender) {
+    if (!username || !email || !password || !name || !phone || !age || !gender || !address) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -41,12 +42,12 @@ const CreateAccount = () => {
         phone,
         age,
         gender,
+        address, // ✅ include address in request
       });
 
       toast.success("Account created successfully");
       navigate("/login");
     } catch (error) {
-      // Handle duplicate username/email
       if (error.response?.data?.error) {
         if (error.response.data.error.includes("duplicate key")) {
           if (error.response.data.error.includes("username")) {
@@ -63,7 +64,6 @@ const CreateAccount = () => {
         }
       }
 
-      // Fallback messages
       const message =
         error.response?.data?.message ||
         error.message ||
@@ -109,6 +109,16 @@ const CreateAccount = () => {
                 placeholder="Phone Number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+              />
+            </LabelInputContainer>
+
+            {/* Address */}
+            <LabelInputContainer className="mb-4">
+              <Label>Address</Label>
+              <Input
+                placeholder="Enter your address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
             </LabelInputContainer>
 
@@ -200,7 +210,6 @@ const CreateAccount = () => {
               Sign up &rarr;
             </button>
 
-            {/* Link to Service Provider registration */}
             <p className="mt-4 text-center text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
               <span onClick={() => navigate("/register/provider")}>
                 Register as a Service Provider?
