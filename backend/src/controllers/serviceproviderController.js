@@ -257,7 +257,20 @@ export const updateRequestStatus = async (req, res) => {
       from: process.env.SENDER_EMAIL,
       to: request.userId.email,
       subject: `Your request for ${request.serviceId.name} is ${status}`,
-      text: `Hello ${request.userId.username},\n\nYour request for "${request.serviceId.name}" has been ${status.toLowerCase()} by the service provider.\n\nRegards,\nLocal Aid Team`,
+text: `Hello ${request.userId.username},
+
+We wanted to update you about your recent service request.
+
+📌 Service: ${request.serviceId.name}  
+📅 Requested On: ${new Date(request.requestDate).toLocaleDateString()}  
+⚡ Status Update: Your request has been *${status.toLowerCase()}* by the service provider.  
+
+If you have any questions or need further assistance, please don’t hesitate to contact us.
+
+Thank you for choosing Local Aid!
+
+Best regards,  
+The Local Aid Team`
     };
 
     await transporter.sendMail(mailOptions);
