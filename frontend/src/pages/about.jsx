@@ -56,11 +56,7 @@ const people = [
             LAMS ensures that you can connect quickly, securely, and conveniently — all in one place.
           </p>
 
-          <p className="text-neutral-300 dark:text-neutral-100 text-sm sm:text-base leading-relaxed mt-4">
-            With features like <span className="font-medium">real-time availability, secure payments, 
-            AI chatbot support, and verified credentials</span>, our goal is to simplify access 
-            to essential services while ensuring trust and reliability within communities.
-          </p>
+          
 
           <p className="text-neutral-400 dark:text-neutral-200 italic mt-6">
             "LAMS — bringing local help closer to you, one click at a time."
