@@ -16,6 +16,7 @@ const NavbarDemo = () => {
   const navigate = useNavigate();
 
   const navItems = [
+    { name: "Home", link: "/user/userHomepage" },
     { name: "Services", link: "/user/viewservices" },
     { name: "My Requests", link: "/user/viewrequests" },
     { name: "History", link: "/user/history" },
@@ -33,10 +34,9 @@ const NavbarDemo = () => {
 
         if (!res.ok) throw new Error("Not logged in");
       } catch (err) {
-        window.location.replace("/login"); // redirect to login if not logged in
+        window.location.replace("/login");
       }
 
-      // Disable back navigation
       window.history.pushState(null, "", window.location.href);
       const handleBack = () => window.history.pushState(null, "", window.location.href);
       window.addEventListener("popstate", handleBack);
@@ -55,23 +55,22 @@ const NavbarDemo = () => {
 
   // ---------- Logout ----------
   const handleLogout = async () => {
-  try {
-    await fetch("http://localhost:5001/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    window.location.replace("/login"); // force reload
-  } catch (err) {
-    console.error("Logout failed:", err);
-  }
-};
-
+    try {
+      await fetch("http://localhost:5001/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.replace("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   return (
     <Navbar>
       {/* Desktop */}
       <NavBody>
-        <div onClick={() => handleNavigate("/user/userHomepage")} className="cursor-pointer">
+        <div className="pointer-events-none"> {/* Logo is now fully unclickable */}
           <NavbarLogo />
         </div>
         <NavItems
@@ -93,7 +92,7 @@ const NavbarDemo = () => {
       {/* Mobile */}
       <MobileNav>
         <MobileNavHeader>
-          <div onClick={() => handleNavigate("/user/userHomepage")} className="cursor-pointer">
+          <div className="pointer-events-none"> {/* Logo is now fully unclickable */}
             <NavbarLogo />
           </div>
           <MobileNavToggle

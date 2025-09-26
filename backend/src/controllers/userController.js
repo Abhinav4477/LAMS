@@ -203,13 +203,6 @@ The Local Aid Team`;
   }
 };
 
-
-
-
-
-
-
-
 // ---------------- Check if a service request exists ----------------
 export const checkServiceRequest = async (req, res) => {
   try {
