@@ -5,6 +5,8 @@ import { ShootingStars } from "../components/ui/shooting-stars";
 import { StarsBackground } from "../components/ui/stars-background";
 import { TypewriterEffectSmooth } from "../components/ui/typewriter-effect";
 import { AnimatedTooltip } from "../components/ui/animated-tooltip";
+import abhinavImg from "../assets/images/abhinav.png";
+import deepakImg from "../assets/images/deepak.png";
 
 const AboutPage = () => {
   const words = [
@@ -15,22 +17,25 @@ const AboutPage = () => {
     { text: "This is LAMS.", className: "text-blue-500 dark:text-blue-500" },
   ];
 
-  const people = [
-    {
-      id: 1,
-      name: "Abhinav Dileep",
-      designation: "Developer",
-      image:
-        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 2,
-      name: "Deepak K S",
-      designation: "Developer",
-      image:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80",
-    },
-  ];
+
+
+
+const people = [
+  {
+    id: 1,
+    name: "Abhinav Dileep",
+    designation: "Developer",
+    image: abhinavImg,
+  },
+  {
+    id: 2,
+    name: "Deepak K S",
+    designation: "Developer",
+    image: deepakImg,
+  },
+];
+
+
 
   return (
     <div>
