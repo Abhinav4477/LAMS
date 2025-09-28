@@ -326,7 +326,8 @@ const UpdateService = () => {
           {(preview || originalImage) && (
             <div className="flex justify-center mb-4">
               <img
-            src={`${API_BASE_URL}/${service.coverImage}`}   alt="Preview"
+            src={`${API_BASE_URL}/${originalImage}`} 
+                alt="Preview"
                 className="w-48 h-48 object-cover rounded-xl border border-gray-600"
               />
             </div>
