@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast from "react-hot-toast";
 import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
@@ -22,7 +22,7 @@ const AccountPage = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/user/account", {
+        const res = await api.get("/user/account", {
           withCredentials: true,
         });
 
@@ -70,7 +70,7 @@ const AccountPage = () => {
 
     try {
       // ✅ send full form instead of partial update
-      await axios.put("http://localhost:5001/api/user/account", form, {
+      await api.put("/user/account", form, {
         withCredentials: true,
       });
 

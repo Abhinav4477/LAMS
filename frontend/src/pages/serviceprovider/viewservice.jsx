@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
+import { API_BASE_URL } from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
@@ -15,7 +16,7 @@ const ViewServices = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5001/api/provider/services", {
+      const res = await api.get("/provider/services", {
         withCredentials: true,
       });
       setServices(Array.isArray(res.data) ? res.data : []);
@@ -37,7 +38,7 @@ const ViewServices = () => {
 
     try {
       setDeleting(id);
-      await axios.delete(`http://localhost:5001/api/provider/service/${id}`, {
+      await api.delete(`/provider/service/${id}`, {
         withCredentials: true,
       });
       toast.success("Service deleted successfully");
@@ -90,7 +91,7 @@ const ViewServices = () => {
                 {/* Cover Image */}
                 {service.coverImage && (
                   <img
-                    src={`http://localhost:5001/${service.coverImage}`}
+                   src={`${API_BASE_URL}/${service.coverImage}`} 
                     alt={service.name}
                     className="w-full h-48 object-cover rounded-2xl mb-4"
                   />

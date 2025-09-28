@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
+import { API_BASE_URL } from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
@@ -40,8 +41,8 @@ const ViewServices = () => {
     const fetchDropdowns = async () => {
       try {
         const [catRes, stateRes] = await Promise.all([
-          axios.get("http://localhost:5001/api/admin/getcategories", axiosConfig),
-          axios.get("http://localhost:5001/api/admin/getstates", axiosConfig),
+          api.get("/admin/getcategories", axiosConfig),
+          api.get("/admin/getstates", axiosConfig),
         ]);
         setCategories(catRes.data);
         setStates(stateRes.data);
@@ -64,8 +65,8 @@ const ViewServices = () => {
         return;
       }
       try {
-        const res = await axios.get(
-          `http://localhost:5001/api/admin/getdistricts/${stateId}`,
+        const res = await api.get(
+          `/admin/getdistricts/${stateId}`,
           axiosConfig
         );
         setDistricts(res.data);
@@ -89,8 +90,8 @@ const ViewServices = () => {
         return;
       }
       try {
-        const res = await axios.get(
-          `http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`,
+        const res = await api.get(
+          `/admin/getlocationbydistrict/${districtId}`,
           axiosConfig
         );
         setLocations(res.data);
@@ -107,7 +108,7 @@ const ViewServices = () => {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5001/api/user/services", {
+      const res = await api.get("/user/services", {
         params: { categoryId, stateId, districtId, locationId, sortBy },
         ...axiosConfig,
       });
@@ -250,7 +251,7 @@ const ViewServices = () => {
               >
                 {service.coverImage && (
                   <img
-                    src={`http://localhost:5001/${service.coverImage}`}
+src={`${API_BASE_URL}/${service.coverImage}`}
                     alt={service.name}
                     className="w-full h-48 object-cover"
                   />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const Addcategory = () => {
@@ -15,7 +15,7 @@ const Addcategory = () => {
       return;
     }
     try {
-      await axios.post("http://localhost:5001/api/admin/addcategory", { name });
+      await api.post("/admin/addcategory", { name });
       toast.success("Category Added Successfully");
       navigate("/admin/viewcategory");
     } catch (error) {

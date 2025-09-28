@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 
 const Viewsprequests = () => {
   const [requests, setRequests] = useState([]);
@@ -12,8 +12,8 @@ const Viewsprequests = () => {
   // Fetch all service providers
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5001/api/admin/getsprequests",
+      const res = await api.get(
+        "/admin/getsprequests",
         { withCredentials: true }
       );
 
@@ -42,8 +42,8 @@ const Viewsprequests = () => {
     try {
       setBtnLoading((prev) => ({ ...prev, [providerId]: true }));
 
-      const res = await axios.put(
-        `http://localhost:5001/api/admin/verifyserviceprovider/${providerId}`,
+      const res = await api.put(
+        `/admin/verifyserviceprovider/${providerId}`,
         {},
         { withCredentials: true }
       );
@@ -73,8 +73,8 @@ const Viewsprequests = () => {
     try {
       setBtnLoading((prev) => ({ ...prev, [providerId]: true }));
 
-      const res = await axios.put(
-        `http://localhost:5001/api/admin/revokeserviceprovider/${providerId}`,
+      const res = await api.put(
+        `/admin/revokeserviceprovider/${providerId}`,
         {},
         { withCredentials: true }
       );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const Viewdistrict = () => {
@@ -13,7 +13,7 @@ const Viewdistrict = () => {
   // Fetch all states
   const fetchStates = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/admin/getstates");
+      const res = await api.get("/admin/getstates");
       setStates(res.data);
     } catch (error) {
       console.error(error);
@@ -24,9 +24,9 @@ const Viewdistrict = () => {
   // Fetch districts (all or by state)
   const fetchDistricts = async (stateId = "") => {
     try {
-      let url = "http://localhost:5001/api/admin/getdistricts";
+      let url = "/admin/getdistricts";
       if (stateId) url += `/${stateId}`;
-      const res = await axios.get(url);
+      const res = await api.get(url);
       setDistricts(res.data);
     } catch (error) {
       console.error(error);
@@ -43,7 +43,7 @@ const Viewdistrict = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this district?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/admin/deletedistrict/${id}`);
+      await api.delete(`/admin/deletedistrict/${id}`);
       toast.success("District deleted successfully");
       fetchDistricts(selectedState); // refresh list based on filter
     } catch (error) {

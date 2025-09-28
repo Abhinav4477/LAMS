@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import axios from "axios";
+import api from "../lib/axios";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { cn } from "../lib/utils";
@@ -27,8 +27,8 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5001/api/auth/login",
+      const res = await api.post(
+        "/auth/login",
         { username, password },
         { withCredentials: true }
       );

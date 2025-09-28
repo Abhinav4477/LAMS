@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const ViewLocation = () => {
@@ -15,7 +15,7 @@ const ViewLocation = () => {
   // Fetch all states
   const fetchStates = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/admin/getstates");
+      const res = await api.get("/admin/getstates");
       setStates(res.data);
     } catch (error) {
       console.error(error);
@@ -31,7 +31,7 @@ const ViewLocation = () => {
       return;
     }
     try {
-      const res = await axios.get(`http://localhost:5001/api/admin/getdistricts/${stateId}`);
+      const res = await api.get(`/admin/getdistricts/${stateId}`);
       setDistricts(res.data);
     } catch (error) {
       console.error(error);
@@ -45,10 +45,10 @@ const ViewLocation = () => {
       let res;
       if (districtId) {
         // Fetch only locations for the selected district
-        res = await axios.get(`http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`);
+        res = await api.get(`/admin/getlocationbydistrict/${districtId}`);
       } else {
         // Default: fetch all locations
-        res = await axios.get("http://localhost:5001/api/admin/getlocations");
+        res = await api.get("/admin/getlocations");
       }
       setLocations(res.data);
     } catch (error) {
@@ -61,7 +61,7 @@ const ViewLocation = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this location?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/admin/deletelocation/${id}`);
+      await api.delete(`/admin/deletelocation/${id}`);
       toast.success("Location deleted successfully");
       fetchLocations(selectedDistrict); // Refresh filtered or all locations
     } catch (error) {

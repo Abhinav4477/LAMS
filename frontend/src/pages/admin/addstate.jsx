@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const Addstate = () => {
@@ -15,7 +15,7 @@ const Addstate = () => {
       return;
     }
     try {
-      await axios.post("http://localhost:5001/api/admin/addstate", {
+      await api.post("/admin/addstate", {
         name,
       });
       toast.success("State Added Successfully");

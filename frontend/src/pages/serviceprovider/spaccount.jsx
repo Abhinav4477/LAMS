@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
@@ -24,8 +24,8 @@ const SPAccount = () => {
   const fetchProviderDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "http://localhost:5001/api/provider/account/me",
+      const res = await api.get(
+        "/provider/account/me",
         { withCredentials: true }
       );
       setProvider(res.data);
@@ -57,8 +57,8 @@ const SPAccount = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      await axios.put(
-        "http://localhost:5001/api/provider/account/me",
+      await api.put(
+        "/provider/account/me",
         formData,
         { withCredentials: true }
       );
@@ -83,8 +83,8 @@ const SPAccount = () => {
   const confirmAvailabilityChange = async () => {
     try {
       setAvailability(pendingAvailability);
-      await axios.put(
-        "http://localhost:5001/api/provider/availability",
+      await api.put(
+        "/provider/availability",
         { is_available: pendingAvailability },
         { withCredentials: true }
       );

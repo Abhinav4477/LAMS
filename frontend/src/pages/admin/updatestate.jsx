@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 const Updatestate = () => {
@@ -13,7 +13,7 @@ const Updatestate = () => {
   useEffect(() => {
     const fetchState = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getstate/${id}`);
+        const res = await api.get(`/admin/getstate/${id}`);
         setstatename(res.data.name);
       } catch (error) {
         console.error(error);
@@ -30,7 +30,7 @@ const Updatestate = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:5001/api/admin/updatestate/${id}`, { name });
+      await api.put(`/admin/updatestate/${id}`, { name });
       toast.success("State Updated Successfully");
       navigate("/admin/viewstate");
     } catch (error) {

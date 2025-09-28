@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
@@ -20,7 +20,7 @@ const ViewRequests = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5001/api/provider/requests", {
+      const res = await api.get("/provider/requests", {
         withCredentials: true,
       });
       if (res.data.success) setRequests(res.data.data || []);
@@ -40,8 +40,8 @@ const ViewRequests = () => {
   // Accept / Reject
   const updateRequestStatus = async (id, status) => {
     try {
-      const res = await axios.put(
-        `http://localhost:5001/api/provider/requests/${id}`,
+      const res = await api.put(
+        `/provider/requests/${id}`,
         { status },
         { withCredentials: true }
       );

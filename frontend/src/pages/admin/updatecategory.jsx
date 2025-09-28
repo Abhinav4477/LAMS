@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 const UpdateCategory = () => {
@@ -13,7 +13,7 @@ const UpdateCategory = () => {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getcategory/${id}`);
+        const res = await api.get(`/admin/getcategory/${id}`);
         setCategoryName(res.data.name || "");
       } catch (error) {
         console.error(error);
@@ -31,7 +31,7 @@ const UpdateCategory = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:5001/api/admin/updatecategory/${id}`, { name });
+      await api.put(`/admin/updatecategory/${id}`, { name });
       toast.success("Category Updated Successfully");
       navigate("/admin/viewcategory");
     } catch (error) {

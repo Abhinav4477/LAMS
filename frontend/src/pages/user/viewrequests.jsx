@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
+import { API_BASE_URL } from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import NavbarDemo from "../../components/user/Unavbar";
@@ -22,8 +23,8 @@ const ViewRequests = () => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          "http://localhost:5001/api/user/service-request/my-requests",
+        const res = await api.get(
+          "/user/service-request/my-requests",
           { withCredentials: true }
         );
         setRequests(res.data);
@@ -39,8 +40,8 @@ const ViewRequests = () => {
 
   const handlePayment = async (req) => {
     try {
-      const res = await axios.post(
-        `http://localhost:5001/api/payment/pay/${req._id}`,
+      const res = await api.post(
+        `/payment/pay/${req._id}`,
         {},
         { withCredentials: true }
       );
@@ -137,7 +138,7 @@ const ViewRequests = () => {
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {req.serviceId?.coverImage && (
                     <img
-                      src={`http://localhost:5001/${req.serviceId.coverImage}`}
+                      src={`${API_BASE_URL}/${req.serviceId.coverImage}`}
                       alt={req.serviceId?.name}
                       className="w-full md:w-24 h-24 rounded-lg object-cover flex-shrink-0"
                     />

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
@@ -33,7 +33,7 @@ const CreateAccount = () => {
     }
 
     try {
-      await axios.post("http://localhost:5001/api/auth/register", {
+      await api.post("/auth/register", {
         username,
         password,
         email,

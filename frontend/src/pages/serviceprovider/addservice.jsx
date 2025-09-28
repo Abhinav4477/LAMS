@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
@@ -28,8 +28,8 @@ const AddService = () => {
       try {
         setLoading(true);
         const [stateRes, categoryRes] = await Promise.all([
-          axios.get("http://localhost:5001/api/admin/getstates", { withCredentials: true }),
-          axios.get("http://localhost:5001/api/admin/getcategories", { withCredentials: true }),
+          api.get("/admin/getstates", { withCredentials: true }),
+          api.get("/admin/getcategories", { withCredentials: true }),
         ]);
         setStates(Array.isArray(stateRes.data) ? stateRes.data : []);
         setCategories(Array.isArray(categoryRes.data) ? categoryRes.data : []);
@@ -54,7 +54,7 @@ const AddService = () => {
     }
     const fetchDistricts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getdistricts/${stateId}`, { withCredentials: true });
+        const res = await api.get(`/admin/getdistricts/${stateId}`, { withCredentials: true });
         setDistricts(Array.isArray(res.data) ? res.data : []);
         setDistrictId("");
         setLocations([]);
@@ -76,7 +76,7 @@ const AddService = () => {
     }
     const fetchLocations = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`, { withCredentials: true });
+        const res = await api.get(`/admin/getlocationbydistrict/${districtId}`, { withCredentials: true });
         setLocations(Array.isArray(res.data) ? res.data : []);
         setLocationId("");
       } catch (error) {
@@ -111,8 +111,8 @@ const AddService = () => {
       formData.append("locationId", locationId);
       if (coverImage) formData.append("coverImage", coverImage);
 
-      await axios.post(
-        "http://localhost:5001/api/provider/service",
+      await api.post(
+        "/provider/service",
         formData,
         { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );

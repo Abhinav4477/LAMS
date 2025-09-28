@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
+import { API_BASE_URL } from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
 import Footer from "../../components/Footer";
@@ -36,8 +37,8 @@ const UpdateService = () => {
     const fetchDropdowns = async () => {
       try {
         const [catRes, stateRes] = await Promise.all([
-          axios.get("http://localhost:5001/api/admin/getcategories", { withCredentials: true }),
-          axios.get("http://localhost:5001/api/admin/getstates", { withCredentials: true }),
+          api.get("/admin/getcategories", { withCredentials: true }),
+          api.get("/admin/getstates", { withCredentials: true }),
         ]);
         setCategories(Array.isArray(catRes.data) ? catRes.data : []);
         setStates(Array.isArray(stateRes.data) ? stateRes.data : []);
@@ -54,7 +55,7 @@ const UpdateService = () => {
     const fetchService = async () => {
       try {
         setLoading(true);
-        const serviceRes = await axios.get(`http://localhost:5001/api/provider/service/${id}`, { withCredentials: true });
+        const serviceRes = await api.get(`/provider/service/${id}`, { withCredentials: true });
         const service = serviceRes.data;
 
         setName(service.name);
@@ -80,26 +81,26 @@ const UpdateService = () => {
         }
 
         // Fetch location
-        const locationRes = await axios.get(`http://localhost:5001/api/admin/getlocation/${service.location._id}`, { withCredentials: true });
+        const locationRes = await api.get(`/admin/getlocation/${service.location._id}`, { withCredentials: true });
         const location = locationRes.data;
         initialData.districtId = location.district?._id || "";
         setDistrictId(initialData.districtId);
 
         // Fetch district
         if (location.district) {
-          const districtRes = await axios.get(`http://localhost:5001/api/admin/getdistrict/${location.district._id}`, { withCredentials: true });
+          const districtRes = await api.get(`/admin/getdistrict/${location.district._id}`, { withCredentials: true });
           const district = districtRes.data;
           initialData.stateId = district.state?._id || "";
           setStateId(initialData.stateId);
 
           if (district.state?._id) {
-            const districtsRes = await axios.get(`http://localhost:5001/api/admin/getdistricts/${district.state._id}`, { withCredentials: true });
+            const districtsRes = await api.get(`/admin/getdistricts/${district.state._id}`, { withCredentials: true });
             setDistricts(Array.isArray(districtsRes.data) ? districtsRes.data : []);
           }
         }
 
         if (location.district?._id) {
-          const locationsRes = await axios.get(`http://localhost:5001/api/admin/getlocationbydistrict/${location.district._id}`, { withCredentials: true });
+          const locationsRes = await api.get(`/admin/getlocationbydistrict/${location.district._id}`, { withCredentials: true });
           setLocations(Array.isArray(locationsRes.data) ? locationsRes.data : []);
         }
 
@@ -126,7 +127,7 @@ const UpdateService = () => {
     }
     const fetchDistricts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getdistricts/${stateId}`, { withCredentials: true });
+        const res = await api.get(`/admin/getdistricts/${stateId}`, { withCredentials: true });
         setDistricts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
@@ -145,7 +146,7 @@ const UpdateService = () => {
     }
     const fetchLocations = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getlocationbydistrict/${districtId}`, { withCredentials: true });
+        const res = await api.get(`/admin/getlocationbydistrict/${districtId}`, { withCredentials: true });
         setLocations(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
@@ -173,7 +174,7 @@ const UpdateService = () => {
       formData.append("locationId", locationId);
       if (coverImage) formData.append("coverImage", coverImage);
 
-      await axios.put(`http://localhost:5001/api/provider/service/${id}`, formData, {
+      await api.put(`/provider/service/${id}`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -325,8 +326,7 @@ const UpdateService = () => {
           {(preview || originalImage) && (
             <div className="flex justify-center mb-4">
               <img
-                src={preview || `http://localhost:5001/${originalImage}`}
-                alt="Preview"
+            src={`${API_BASE_URL}/${service.coverImage}`}   alt="Preview"
                 className="w-48 h-48 object-cover rounded-xl border border-gray-600"
               />
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const UpdateDistrict = () => {
@@ -15,7 +15,7 @@ const UpdateDistrict = () => {
   useEffect(() => {
     const fetchStates = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/admin/getstates");
+        const res = await api.get("/admin/getstates");
         setStates(res.data);
       } catch (error) {
         console.error(error);
@@ -29,8 +29,8 @@ const UpdateDistrict = () => {
   useEffect(() => {
     const fetchDistrict = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5001/api/admin/getdistrict/${districtId}`
+        const res = await api.get(
+          `/admin/getdistrict/${districtId}`
         );
 
         setDistrictName(res.data.name);
@@ -55,8 +55,8 @@ const UpdateDistrict = () => {
       return;
     }
     try {
-      await axios.put(
-        `http://localhost:5001/api/admin/updatedistrict/${districtId}`,
+      await api.put(
+        `/admin/updatedistrict/${districtId}`,
         {
           name,
           stateId,

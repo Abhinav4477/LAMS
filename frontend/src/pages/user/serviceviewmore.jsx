@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
+import { API_BASE_URL } from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
@@ -47,7 +48,7 @@ const ServiceView = () => {
   const fetchService = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5001/api/user/service/${id}`, {
+      const res = await api.get(`/user/service/${id}`, {
         withCredentials: true,
       });
       setService(res.data);
@@ -65,7 +66,7 @@ const ServiceView = () => {
   // Check request
   const checkRequest = async () => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/user/service-request/check/${id}`, {
+      const res = await api.get(`/user/service-request/check/${id}`, {
         withCredentials: true,
       });
       setCanRequest(res.data.canRequest);
@@ -84,7 +85,7 @@ const ServiceView = () => {
   // Fetch reviews
   const fetchReviews = async () => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/review/${id}`, { withCredentials: true });
+      const res = await api.get(`/review/${id}`, { withCredentials: true });
       setReviews(res.data.reviews);
       setAvgRating(res.data.avgRating);
       setReviewCount(res.data.reviewCount);
@@ -102,8 +103,8 @@ const ServiceView = () => {
     try {
       setSubmittingReview(true);
       // The backend should attach logged-in user automatically
-      await axios.post(
-        "http://localhost:5001/api/review",
+      await api.post(
+        "/review",
         { serviceId: id, rating: newRating, review: newReview },
         { withCredentials: true }
       );
@@ -127,8 +128,8 @@ const ServiceView = () => {
 
     try {
       setRequesting(true);
-      const res = await axios.post(
-        "http://localhost:5001/api/user/service-request",
+      const res = await api.post(
+        "/user/service-request",
         { serviceId: service._id, providerId: service.provider._id },
         { withCredentials: true }
       );
@@ -149,8 +150,8 @@ const ServiceView = () => {
 
     try {
       setRequesting(true);
-      const res = await axios.patch(
-        `http://localhost:5001/api/user/service-request/${activeRequest._id}/cancel`,
+      const res = await api.patch(
+        `/user/service-request/${activeRequest._id}/cancel`,
         {},
         { withCredentials: true }
       );
@@ -184,7 +185,7 @@ const ServiceView = () => {
         {/* Service info */}
         <div className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
           <button onClick={() => navigate("/user/viewservices")} className="absolute top-4 left-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded z-10">&larr; Go Back</button>
-          {service.coverImage && <img src={`http://localhost:5001/${service.coverImage}`} alt={service.name} className="w-full md:w-1/2 h-64 md:h-auto object-cover" />}
+          {service.coverImage && <img src={`${API_BASE_URL}/${service.coverImage}`} alt={service.name} className="w-full md:w-1/2 h-64 md:h-auto object-cover" />}
           <div className="p-6 flex flex-col flex-1 space-y-2">
             <h1 className="text-3xl font-bold">{service.name}</h1>
             <p className="text-green-400 font-bold text-xl">₹{service.price}</p>

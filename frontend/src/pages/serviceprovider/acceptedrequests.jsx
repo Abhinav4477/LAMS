@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import SPNavbar from "../../components/serviceprovider/SPNavbar";
@@ -23,8 +23,8 @@ const RequestsPage = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "http://localhost:5001/api/provider/requests/all",
+      const res = await api.get(
+        "/provider/requests/all",
         { withCredentials: true }
       );
 
@@ -60,8 +60,8 @@ const RequestsPage = () => {
 
     try {
       setUpdatingId(id);
-      const res = await axios.put(
-        `http://localhost:5001/api/provider/request/${id}`,
+      const res = await api.put(
+        `/provider/request/${id}`,
         { status: newStatus },
         { withCredentials: true }
       );

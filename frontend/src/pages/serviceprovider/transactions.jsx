@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import Footer from "../../components/Footer";
 import jsPDF from "jspdf";
@@ -24,8 +24,8 @@ const SPTransactionHistory = () => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          "http://localhost:5001/api/payment/provider/history",
+        const res = await api.get(
+          "/payment/provider/history",
           { withCredentials: true }
         );
         setTransactions(res.data);

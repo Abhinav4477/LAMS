@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 
 const ViewState = () => {
   const [states, setStates] = useState([]);
@@ -11,7 +11,7 @@ const ViewState = () => {
   // Fetch states
   const fetchStates = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/admin/getstates");
+      const res = await api.get("/admin/getstates");
       setStates(res.data);
     } catch (error) {
       console.error(error);
@@ -27,7 +27,7 @@ const ViewState = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this state?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/admin/deletestate/${id}`);
+      await api.delete(`/admin/deletestate/${id}`);
       toast.success("State deleted successfully");
       fetchStates();
     } catch (error) {

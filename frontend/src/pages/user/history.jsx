@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast, { Toaster } from "react-hot-toast";
 import NavbarDemo from "../../components/user/Unavbar";
 import Footer from "../../components/Footer";
@@ -22,8 +22,8 @@ const TransactionHistory = () => {
     const fetchPayments = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          "http://localhost:5001/api/payment/history",
+        const res = await api.get(
+          "/payment/history",
           { withCredentials: true }
         );
         setPayments(res.data);

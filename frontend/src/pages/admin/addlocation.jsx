@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const AddLocation = () => {
@@ -16,7 +16,7 @@ const AddLocation = () => {
   useEffect(() => {
     const fetchStates = async () => {
       try {
-        const res = await axios.get("http://localhost:5001/api/admin/getstates");
+        const res = await api.get("/admin/getstates");
         setStates(res.data);
       } catch (error) {
         console.error(error);
@@ -35,7 +35,7 @@ const AddLocation = () => {
     }
     const fetchDistricts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/admin/getdistricts/${stateId}`);
+        const res = await api.get(`/admin/getdistricts/${stateId}`);
         setDistricts(res.data);
       } catch (error) {
         console.error(error);
@@ -52,7 +52,7 @@ const AddLocation = () => {
       return;
     }
     try {
-      await axios.post("http://localhost:5001/api/admin/addlocation", {
+      await api.post("/admin/addlocation", {
         name,
         districtId,
       });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SidebarLayout from "../../components/admin/adminsidebar";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 
 const ViewCategory = () => {
@@ -11,7 +11,7 @@ const ViewCategory = () => {
   // Fetch all categories
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/admin/getcategories");
+      const res = await api.get("/admin/getcategories");
       setCategories(res.data);
     } catch (error) {
       console.error(error);
@@ -23,7 +23,7 @@ const ViewCategory = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/admin/deletecategory/${id}`);
+      await api.delete(`/admin/deletecategory/${id}`);
       toast.success("Category deleted successfully");
       fetchCategories(); // refresh
     } catch (error) {

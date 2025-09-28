@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/axios";
 import {
   PieChart, Pie, Cell, Tooltip,
   BarChart, XAxis, YAxis, Bar, Legend, ResponsiveContainer
@@ -19,8 +19,8 @@ const SPReport = () => {
     const fetchReport = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          "http://localhost:5001/api/payment/provider/report",
+        const res = await api.get(
+          "/payment/provider/report",
           { withCredentials: true }
         );
         setData(res.data);
