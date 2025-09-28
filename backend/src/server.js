@@ -1,36 +1,56 @@
-import express from "express"
-import loginRoutes from "./routes/authenticationRoutes.js"
+import express from "express";
+import loginRoutes from "./routes/authenticationRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import serviceproviderRoutes from "./routes/serviceproviderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"
+import reviewRoutes from "./routes/reviewRoutes.js"
 import connectDB from "./confg/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+
 dotenv.config();
 
-//created the app object
-const app=express();
+const app = express();
+const PORT = process.env.PORT || 5001;
+const __dirname=path.resolve();
 
-//setting the port to connect
-const PORT=process.env.PORT || 5001;
-
-
-
-//connecting to the database
-connectDB();
-
+// Middlewares
+if(process.env.NODE_ENV !=="production"){
 app.use(cors({
-    credentials:true,
-    origin:"http://localhost:5173" // Allow requests from the frontend
-    }))
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(cookieParser()); // Middleware to parse cookies
+  credentials: true,
+  origin: "http://localhost:5173"
+}));
+} 
+app.use(express.json());
+app.use(cookieParser());
 
+// Serve uploaded images
+app.use("/upload", express.static(path.join(path.resolve(), "upload")));
 
-//redirecting the requests to the corresponding Routes
+// Routes
+app.use("/api/auth", loginRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/provider", serviceproviderRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/payment",paymentRoutes);
+app.use("/api/review",reviewRoutes);
 
-app.use("/api/auth",loginRoutes);
+if( process.env.NODE_ENV ==="production"){
+  app.use(express.static(path.join(__dirname,"../frontend/dist")));
+app.get("*",(req,res) =>{
+  res.sendFile(path.join(__dirname,"../frontend","dist","index.html"))
+});
+}
 
-
-app.listen(5001,()=>{
-    console.log("Server Started at PORT "+PORT);
-})
-
+// Connect DB and start server
+connectDB().then(() => {
+  console.log("Connected to the Database");
+  app.listen(PORT, () => {
+    console.log("Server Started at PORT " + PORT);
+  });
+}).catch((err) => {
+  console.log("Error connecting to the Database", err);
+});
