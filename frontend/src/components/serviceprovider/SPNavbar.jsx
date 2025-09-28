@@ -17,21 +17,7 @@ function Navbar({ className }) {
   const navigate = useNavigate();
 
   // Check authentication on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await axios.get(
-          "http://localhost:5001/api/provider/account/me",
-          { withCredentials: true }
-        );
-        setIsAuthenticated(true);
-      } catch (err) {
-        setIsAuthenticated(false);
-        navigate("/login", { replace: true });
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  
 
   const handleLogout = async () => {
     try {

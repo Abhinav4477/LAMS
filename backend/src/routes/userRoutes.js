@@ -9,32 +9,31 @@ import {
   getCustomerDetails,
   updateCustomerDetails
 } from "../controllers/userController.js";
-import { authenticateUser } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Get all services with filtering and sorting
-router.get("/services", authenticateUser, getAllServices);
+router.get("/services", getAllServices);
 
 // Get a single service by ID
-router.get("/service/:id", authenticateUser, getServiceById);
+router.get("/service/:id",  getServiceById);
 
 // Create a service request
-router.post("/service-request", authenticateUser, createServiceRequest);
+router.post("/service-request",  createServiceRequest);
 
 // Check if a service request already exists
-router.get("/service-request/check/:id", authenticateUser, checkServiceRequest);
+router.get("/service-request/check/:id",  checkServiceRequest);
 
 // Get all requests of the logged-in user
-router.get("/service-request/my-requests", authenticateUser, getMyRequests);
+router.get("/service-request/my-requests", getMyRequests);
 
 // Cancel a service request
-router.patch("/service-request/:id/cancel", authenticateUser, cancelServiceRequest);
+router.patch("/service-request/:id/cancel",  cancelServiceRequest);
 
 // Get account details
-router.get("/account", authenticateUser, getCustomerDetails);
+router.get("/account",  getCustomerDetails);
 
 // Update account details
-router.put("/account", authenticateUser, updateCustomerDetails);
+router.put("/account",  updateCustomerDetails);
 
 export default router;

@@ -25,27 +25,7 @@ const NavbarDemo = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ---------- Check login with backend ----------
-  useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const res = await fetch("http://localhost:5001/api/auth/me", {
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Not logged in");
-      } catch (err) {
-        window.location.replace("/login");
-      }
-
-      window.history.pushState(null, "", window.location.href);
-      const handleBack = () => window.history.pushState(null, "", window.location.href);
-      window.addEventListener("popstate", handleBack);
-
-      return () => window.removeEventListener("popstate", handleBack);
-    };
-
-    checkLogin();
-  }, []);
+ 
 
   // ---------- Navigation ----------
   const handleNavigate = (link) => {
