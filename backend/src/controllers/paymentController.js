@@ -1,5 +1,5 @@
 import Payment from "../models/Payment.js";
-import ServiceRequest from "../models/ServiceRequest.js";
+import ServiceRequest from "../models/Servicerequest.js";
 import User from "../models/Users.js"; // import User model
 import Service from "../models/Service.js"
 import ServiceProvider from "../models/Serviceprovider.js"
