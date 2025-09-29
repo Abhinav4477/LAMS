@@ -14,7 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
 const SidebarLayout = ({ children }) => {
@@ -24,8 +24,8 @@ const SidebarLayout = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "http://localhost:5001/api/auth/logout",
+      await api.post(
+        "/auth/logout",
         {},
         { withCredentials: true }
       );
