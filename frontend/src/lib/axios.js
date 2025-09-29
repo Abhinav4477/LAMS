@@ -5,6 +5,6 @@ const BaseURL= import.meta.env.MODE === "development" ? "http://localhost:5001/a
 const api= axios.create({
     baseURL:BaseURL,
 })
-export const API_BASE_URL = BaseURL;
+export const API_BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : ""
 
 export default api;
