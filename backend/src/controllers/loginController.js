@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';
 import Customer from '../models/Customer.js';
-import ServiceProvider from '../models/ServiceProvider.js';
+import ServiceProvider from '../models/Serviceprovider.js';
 import transporter from '../confg/nodemailer.js';
 
 // -------------------- LOGIN --------------------
