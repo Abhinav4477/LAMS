@@ -11,6 +11,7 @@ import {
 } from "../ui/resizable-navbar";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../lib/axios"; // make sure api has withCredentials: true
 
 const NavbarDemo = () => {
   const navigate = useNavigate();
@@ -23,29 +24,23 @@ const NavbarDemo = () => {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   // ---------- Check login with backend ----------
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/auth/me", {
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Not logged in");
+        await api.get("/auth/me"); // cookie automatically sent via api
+        setIsAuthenticated(true);
       } catch (err) {
-        window.location.replace("/login");
+        setIsAuthenticated(false);
+        navigate("/login", { replace: true });
       }
-
-      window.history.pushState(null, "", window.location.href);
-      const handleBack = () => window.history.pushState(null, "", window.location.href);
-      window.addEventListener("popstate", handleBack);
-
-      return () => window.removeEventListener("popstate", handleBack);
     };
-
     checkLogin();
-  }, []);
+  }, [navigate]);
+
+  if (!isAuthenticated) return null;
 
   // ---------- Navigation ----------
   const handleNavigate = (link) => {
@@ -56,11 +51,9 @@ const NavbarDemo = () => {
   // ---------- Logout ----------
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5001/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      window.location.replace("/login");
+      await api.post("/auth/logout"); // cookie included via api
+      setIsAuthenticated(false);
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -70,7 +63,7 @@ const NavbarDemo = () => {
     <Navbar>
       {/* Desktop */}
       <NavBody>
-        <div className="pointer-events-none"> {/* Logo is now fully unclickable */}
+        <div className="pointer-events-none">
           <NavbarLogo />
         </div>
         <NavItems
@@ -92,7 +85,7 @@ const NavbarDemo = () => {
       {/* Mobile */}
       <MobileNav>
         <MobileNavHeader>
-          <div className="pointer-events-none"> {/* Logo is now fully unclickable */}
+          <div className="pointer-events-none">
             <NavbarLogo />
           </div>
           <MobileNavToggle

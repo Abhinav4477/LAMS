@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, MenuItem, ProductItem } from "../ui/navbar-menu";
 import { cn } from "../../lib/utils";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../lib/axios";
 import toast from "react-hot-toast";
 
 // Example: Import images from src/assets (optional)
@@ -20,8 +20,8 @@ function Navbar({ className }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await axios.get(
-          "http://localhost:5001/api/provider/account/me",
+        await api.get(
+          "/provider/account/me",
           { withCredentials: true }
         );
         setIsAuthenticated(true);
@@ -35,8 +35,8 @@ function Navbar({ className }) {
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "http://localhost:5001/api/auth/logout",
+      await api.post(
+        "/auth/logout",
         {},
         { withCredentials: true }
       );
