@@ -3,7 +3,7 @@ import District from "../models/Districts.js";
 import Location from "../models/Location.js";
 import Category from "../models/Category.js";
 import User from "../models/Users.js";
-import ServiceProvider from "../models/ServiceProvider.js";
+import ServiceProvider from "../models/Serviceprovider.js";
 
 //Function to add a new state
 export const addState = async (req, res) => {
