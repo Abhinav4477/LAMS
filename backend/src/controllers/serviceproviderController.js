@@ -3,7 +3,7 @@ import Category from "../models/Category.js";
 import Location from "../models/Location.js";
 import User from "../models/Users.js";
 import ServiceRequest from "../models/Servicerequest.js";
-import ServiceProvider from "../models/ServiceProvider.js";
+import ServiceProvider from "../models/Serviceprovider.js";
 import path from "path";
 import fs from "fs";
 import nodemailer from "nodemailer";
